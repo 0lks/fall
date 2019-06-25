@@ -1,0 +1,62 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Hex
+  - Enemy
+  - Map
+  - Plant
+  - Rock
+  - Bow
+  - ToolbarBG
+  - Loblolly Pine
+  - HexTarget
+  - lb_bird
+  - lb_groundTarget
+  - lb_perchTarget
+  - Terrain
+  - GroundObjectsParent
+  - Canvas
+  - Cameras
+  - HPbar
+  - Fire
+  - DiscardPool
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - PostProcessing
+  - Hex Map
+  - Characters
+  - Terrain
+  - Arrow
+  - PostProcess
+  - TerrainObjects
+  - TerrainDecorations
+  - Weapons
+  - Player
+  - TerrainHexTargetObject
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0

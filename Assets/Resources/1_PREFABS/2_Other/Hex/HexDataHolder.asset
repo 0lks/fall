@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e21761bd87585c8488aab419c4df5836, type: 3}
+  m_Name: HexDataHolder
+  m_EditorClassIdentifier: 
+  walkable_Edge: {fileID: 2100000, guid: 611c2b9890d06f44fad693f49e26a3b0, type: 2}
+  black_Edge: {fileID: 2100000, guid: df678b987fc341345bddadab19c1a47f, type: 2}
+  base_Center: {fileID: 2100000, guid: 7701762f31d7e8b4887e2d60c7ca7bd2, type: 2}
+  emptyCenter: {fileID: 2100000, guid: 50254ce9944318a4594ac6a9ef0f6097, type: 2}
+  hover_Edge: {fileID: 2100000, guid: 354269eff2320f845ba604ee328ca02c, type: 2}
+  editingHexMaterialEdge: {fileID: 2100000, guid: 134bd9f9c64517849adead567bfcb69f,
+    type: 2}
+  editingHexMaterialCenter: {fileID: 2100000, guid: aa534d632c95c1449ac8b43b4d64c68f,
+    type: 2}
+  hex_25_Edge: {fileID: 2100000, guid: cf69d7bfddd437e4eadbbd6f50243aa1, type: 2}
+  hex_25_Center: {fileID: 2100000, guid: 515ca49b52d7b0745bf2ec6f7b547b7d, type: 2}
+  hex_50_Edge: {fileID: 2100000, guid: 40c892fe65a24064f990f30e9316ab0f, type: 2}
+  hex_50_Center: {fileID: 2100000, guid: 2c345779c35312e4d8b7690c97d52ac4, type: 2}
+  hex_75_Edge: {fileID: 2100000, guid: 26d411a7241f6ff4dad40020dbd1f4eb, type: 2}
+  hex_75_Center: {fileID: 2100000, guid: 4d784cce9d0b36a4b8ea203c14b4effd, type: 2}
+  hex_100_Edge: {fileID: 2100000, guid: e814fbed3feaab449811cbac57af7693, type: 2}
+  hex_100_Center: {fileID: 2100000, guid: 75415b005a95e8740b417a92f8326a9f, type: 2}
+  hex_Danger_Center: {fileID: 2100000, guid: cd0198ad713336c41b70922978a8e8c7, type: 2}
+  hexPrefab: {fileID: 1803396775554142, guid: da734983e8429ad45949f3d406f59eb2, type: 3}
+  hexWidth: 8.660254
