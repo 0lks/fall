@@ -237,7 +237,22 @@ ModelImporter:
   - first:
       74: 4266590775925423419
     second: Movement_Walking
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Clothes
+    second: {fileID: 2100000, guid: f41ac837dc2884649b8de5cb79df0ac0, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Hair
+    second: {fileID: 2100000, guid: d3693e9a5be8a3244824358bd4564ea9, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: Skin
+    second: {fileID: 2100000, guid: 590c34d840f2f7f429a1de4df4de9cba, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

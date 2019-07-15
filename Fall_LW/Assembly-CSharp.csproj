@@ -230,7 +230,6 @@
     <Compile Include="Assets\Resources\Scripts\Unimplemented\Item.cs" />
     <Compile Include="Assets\Resources\Scripts\Unimplemented\ItemDATA.cs" />
     <None Include="Assets\Other, Unsorted\PostProcessing\Resources\Shaders\DepthOfField.shader" />
-    <None Include="Assets\Resources\Custom Shaders\XRay.shader" />
     <None Include="Assets\Terrain Maps and Images\Appalachean1\Cherokee Heart README.txt" />
     <None Include="Assets\Other, Unsorted\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\Other, Unsorted\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
@@ -271,7 +270,6 @@
     <None Include="Assets\Other, Unsorted\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile Masking.shader" />
     <None Include="Assets\Other, Unsorted\STANDARD ASSETS\CrossPlatformInput\CrossPlatformInputGuidelines.txt" />
     <None Include="Assets\Other, Unsorted\TextMesh Pro\Examples &amp; Extras\Fonts\Anton OFL.txt" />
-    <None Include="Assets\Resources\Custom Shaders\NOXRay.shader" />
     <None Include="Assets\Other, Unsorted\PostProcessing\Resources\Shaders\Bloom.cginc" />
     <None Include="Assets\Other, Unsorted\PostProcessing\Resources\Shaders\TAA.shader" />
     <None Include="Assets\Other, Unsorted\PostProcessing\Resources\Shaders\EyeHistogram.compute" />

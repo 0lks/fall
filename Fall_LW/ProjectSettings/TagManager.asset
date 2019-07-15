@@ -16,6 +16,7 @@ TagManager:
   - Hex
   - Bow
   - HPbar
+  - Enemy
   layers:
   - Default
   - TransparentFX
@@ -36,7 +37,7 @@ TagManager:
   - Weapons
   - Player
   - TerrainHexTargetObject
-  - 
+  - EnemiesInCombat
   - 
   - 
   - 

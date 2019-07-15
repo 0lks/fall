@@ -20,8 +20,8 @@ public class GameControl : MonoBehaviour {
     public static MouseManagerGameMode playMouse;
     public static bool guiHide;
     public static bool playedSoundThisTurn = false;
-    public static Shader xRay;
-    public static Shader noXRay;
+    //public static Shader xRay;
+    //public static Shader noXRay;
     Stopwatch sw;
     public static Hex selectedHex;
     public static Queue<Hex> movePath;
@@ -114,8 +114,8 @@ public class GameControl : MonoBehaviour {
     void Awake () {
         hexPrefab = (GameObject) Resources.Load("Prefabs/Other/Hex/Hex");
         wolf = (GameObject) Resources.Load("Prefabs/Characters/Wolf/Wolf");
-        xRay = (Shader)Resources.Load("Custom Shaders/XRay");
-        noXRay = (Shader)Resources.Load("Materials/XRay/NOXRay");
+        //xRay = (Shader)Resources.Load("Custom Shaders/XRay");
+        //noXRay = (Shader)Resources.Load("Materials/XRay/NOXRay");
         queueInDistance = _queueInDistance;
         Application.targetFrameRate = 60;
 
@@ -331,14 +331,8 @@ public class GameControl : MonoBehaviour {
                     turnController.addToQueue(enemy);
                 }
 
-                foreach (Renderer rend in enemy.GetComponentsInChildren<Renderer>())
-                {
-                    foreach (Material mat in rend.materials)
-                    {
-                        mat.shader = xRay;
-                        mat.renderQueue = 3000;
-                    }
-                }
+                // Assign the child containing the renderer to layer 19 so that it is rendered with XRay.
+                enemy.transform.GetChild(1).gameObject.layer = 19;
             }
             else
             {
