@@ -9,13 +9,13 @@ public class Hex : MonoBehaviour {
     /*
      * LOCAL DATA
     */
-    public HexSerializedContent serialData;
-    public int x;
-    public int y;
-    public int z;
-    public string id;
+    [HideInInspector] public HexSerializedContent serialData;
+    [HideInInspector] public int x;
+    [HideInInspector] public int y;
+    [HideInInspector] public int z;
+    [HideInInspector] public string id;
     [HideInInspector] public string hexType;
-    public bool[] disabledColliders;
+    [HideInInspector] public bool[] disabledColliders;
     private SphereCollider[] sphereColliders;
     [HideInInspector] public Character occupyingCharacter;
     [HideInInspector] public bool blocked;
@@ -26,9 +26,11 @@ public class Hex : MonoBehaviour {
     List<Hex> immediateNeighbours;
     MeshRenderer meshRend;
 
-    public enum HexType {Walkable, Black, Blocked, Editing, Hover, Danger, Att25, Att50, Att75, Att100, NULL}
-    public HexType type;
-    public HexType previousType;
+    [HideInInspector] public enum HexType {Walkable, Black, Blocked, Editing, Hover, Danger, Att25, Att50, Att75, Att100, NULL}
+    [HideInInspector] public HexType type;
+    [HideInInspector] public HexType previousType;
+    [HideInInspector] public enum Direction {NE, E, SE, SW, W, NW}
+
 
     public HexDataHolder hexData;
 
@@ -98,10 +100,16 @@ public class Hex : MonoBehaviour {
         originalMesh = mesh.vertices;
 
         float[] gp = data.groundPos;
-        GetComponent<SphereCollider>().center = new Vector3(gp[0], gp[1], gp[2]);
+        //GetComponent<SphereCollider>().center = new Vector3(gp[0], gp[1], gp[2]);
+        transform.gameObject.AddComponent<MeshCollider>();
+        GetComponent<MeshCollider>().convex = false;
+        GetComponent<MeshCollider>().sharedMesh = mesh;
+
         GetComponent<CapsuleCollider>().center = new Vector3(gp[0], gp[1], gp[2]);
         Rigidbody rb = gameObject.AddComponent<Rigidbody>();
+        rb.isKinematic = true;
         rb.useGravity = false;
+
         for (int i = 0; i < disabledColliders.Length; i++)
         {
             sphereColliders[i].enabled = !disabledColliders[i];
@@ -115,7 +123,7 @@ public class Hex : MonoBehaviour {
 ////______________________________________________________________________________________________________________________________________________________________________________________________________________
     public void DisableOverlappingColliders()
     {
-        List<KeyValuePair<Hex, string>> neighbours = GetImmediateNeighbours();
+        List<KeyValuePair<Hex, string>> neighbours = GetImmediateNeighboursWithDirection();
         foreach (KeyValuePair<Hex, string> neighbour in neighbours)
         {
             if (neighbour.Value == "NE")
@@ -201,35 +209,43 @@ public class Hex : MonoBehaviour {
     }
     #endregion
     #region Neighbours
-////______________________________________________________________________________________________________________________________________________________________________________________________________________
-    public List<KeyValuePair<Hex, string>> GetImmediateNeighbours()
+    ////______________________________________________________________________________________________________________________________________________________________________________________________________________
+    public List<KeyValuePair<Hex, string>> GetImmediateNeighboursWithDirection()
     {
         List<KeyValuePair<Hex, string>> neighbours = new List<KeyValuePair<Hex, string>>();
 
-        string neighbour_id_NE = (x-1) + "_" + (y+1) + "_" + (z);
-        string neighbour_id_E = (x) + "_" + (y+1) + "_" + (z+1);
-        string neighbour_id_SE = (x+1) + "_" + (y) + "_" + (z+1);
-        string neighbour_id_SW = (x+1) + "_" + (y-1) + "_" + (z);
-        string neighbour_id_W = (x) + "_" + (y-1) + "_" + (z-1);
-        string neighbour_id_NW = (x-1) + "_" + (y) + "_" + (z-1);
+        if (GameControl.map.HexExists(x + 1, y, z - 1))
+            neighbours.Add(new KeyValuePair<Hex, string>(GameControl.map.GetHex(x + 1, y, z - 1), "NE"));
+        if (GameControl.map.HexExists(x + 1, y - 1, z))
+            neighbours.Add(new KeyValuePair<Hex, string>(GameControl.map.GetHex(x + 1, y - 1, z), "E"));
+        if (GameControl.map.HexExists(x, y - 1, z + 1))
+            neighbours.Add(new KeyValuePair<Hex, string>(GameControl.map.GetHex(x, y - 1, z + 1), "SE"));
+        if (GameControl.map.HexExists(x - 1, y, z + 1))
+            neighbours.Add(new KeyValuePair<Hex, string>(GameControl.map.GetHex(x - 1, y, z + 1), "SW"));
+        if (GameControl.map.HexExists(x - 1, y + 1, z))
+            neighbours.Add(new KeyValuePair<Hex, string>(GameControl.map.GetHex(x - 1, y + 1, z), "W"));
+        if (GameControl.map.HexExists(x, y + 1, z - 1))
+            neighbours.Add(new KeyValuePair<Hex, string>(GameControl.map.GetHex(x, y + 1, z - 1), "NW"));
 
-        List<KeyValuePair<string, string>> ids = new List<KeyValuePair<string, string>>() {
-            new KeyValuePair<string, string>(neighbour_id_NE, "NE"),
-            new KeyValuePair<string, string>(neighbour_id_E, "E"),
-            new KeyValuePair<string, string>(neighbour_id_SE, "SE"),
-            new KeyValuePair<string, string>(neighbour_id_SW, "SW"),
-            new KeyValuePair<string, string>(neighbour_id_W, "W"),
-            new KeyValuePair<string, string>(neighbour_id_NW, "NW"),
-        };
+        return neighbours;
+    }
 
-        foreach (KeyValuePair<string, string> id_ in ids)
-        {
-            if (GameControl.map.HexExists(id_.Key))
-            {
-                string neighbourDirection = id_.Value;
-                neighbours.Add(new KeyValuePair<Hex, string>(GameControl.map.map[id_.Key], neighbourDirection));
-            }
-        }
+    public List<Hex> GetImmediateNeighboursNoDir()
+    {
+        List<Hex> neighbours = new List<Hex>();
+
+        if (GameControl.map.HexExists(x + 1, y, z - 1))
+            neighbours.Add(GameControl.map.GetHex(x + 1, y, z - 1));
+        if (GameControl.map.HexExists(x + 1, y - 1, z))
+            neighbours.Add(GameControl.map.GetHex(x + 1, y - 1, z));
+        if (GameControl.map.HexExists(x, y - 1, z + 1))
+            neighbours.Add(GameControl.map.GetHex(x, y - 1, z + 1));
+        if (GameControl.map.HexExists(x - 1, y, z + 1))
+            neighbours.Add(GameControl.map.GetHex(x - 1, y, z + 1));
+        if (GameControl.map.HexExists(x - 1, y + 1, z))
+            neighbours.Add(GameControl.map.GetHex(x - 1, y + 1, z));
+        if (GameControl.map.HexExists(x, y + 1, z - 1))
+            neighbours.Add(GameControl.map.GetHex(x, y + 1, z - 1));
 
         return neighbours;
     }
@@ -255,31 +271,108 @@ public class Hex : MonoBehaviour {
         return output.ToList();
     }
 
-    public List<Hex> GetDistantNeighbours(int distance)
+    public List<Hex> GetDistantNeighbours(int distance, bool inclBlocked)
     {
         List<Hex> neighbours = new List<Hex>();
 
         for (int dx = -distance; dx <= distance; dx++)
         {
-            string id_x = (x + dx).ToString();
+            int id_x = x + dx;
             for (int dy = -distance; dy <= distance; dy++)
             {
-                string id_y = (y + dy).ToString();
+                int id_y = y + dy;
                 for (int dz = -distance; dz <= distance; dz++)
                 {
-                    string id_z = (z + dz).ToString();
-                    string id = string.Join("_", new string[] { id_x, id_y, id_z });
- 
-                    if (GameControl.map.HexExists(id))
+                    int id_z = z + dz;
+                    if (GameControl.map.HexExists(id_x, id_y, id_z))
                     {
-                        Hex hex = GameControl.map.GetHex(id);
-                        if (!hex.blocked) neighbours.Add(hex);
+                        Hex hex = GameControl.map.GetHex(id_x, id_y, id_z);
+                        if (inclBlocked)
+                        {
+                            neighbours.Add(hex);
+                        }
+                        else if (!hex.blocked) neighbours.Add(hex);
                     }
                 }
             }
         }
 
         return neighbours;
+    }
+
+    public static Direction GetDirectionalRelation(Hex hexOrigin, Hex hexEnd)
+    {
+        if ((hexEnd.x > hexOrigin.x) && (hexEnd.z < hexOrigin.z)) return Direction.NE;
+        else if ((hexEnd.x > hexOrigin.x) && (hexEnd.y < hexOrigin.y)) return Direction.E;
+        else if ((hexEnd.y < hexOrigin.y) && (hexEnd.z > hexOrigin.z)) return Direction.SE;
+        else if ((hexEnd.x < hexOrigin.x) && (hexEnd.z > hexOrigin.z)) return Direction.SW;
+        else if ((hexEnd.x < hexOrigin.x) && (hexEnd.y > hexOrigin.y)) return Direction.W;
+        else if ((hexEnd.y > hexOrigin.y) && (hexEnd.z < hexOrigin.z)) return Direction.NW;
+        else throw new Exception("Failed to find the directional relation.");
+    }
+
+    public Hex GetNeighbour(Hex.Direction direction, int distance)
+    // Use "HexExists" before calling this method.
+    // distance = 1 is immediate neighbours.
+    {
+        if (distance < 0) throw new Exception("Attempted to find a neighbour using a negative distance parameter.");
+        else if (distance == 0) return this;
+
+        try
+        {
+            if      (direction == Hex.Direction.NE) return GameControl.map.GetHex(x + distance, y, z - distance);
+            else if (direction == Hex.Direction.E) return GameControl.map.GetHex(x + distance, y - distance, z);
+            else if (direction == Hex.Direction.SE) return GameControl.map.GetHex(x, y - distance, z + distance);
+            else if (direction == Hex.Direction.SW) return GameControl.map.GetHex(x - distance, y, z + distance);
+            else if (direction == Hex.Direction.W) return GameControl.map.GetHex(x - distance, y + distance, z);
+            else return GameControl.map.GetHex(x, y + distance, z - distance);
+        }
+        catch (Exception e)
+        {
+            throw e;
+        }
+    }
+
+    public static int[] GetAxis(Direction direction)
+    {
+        int[] axis = new int[3];
+        if (direction == Direction.NE)
+        {
+            axis[0] = +1;
+            axis[1] = 0;
+            axis[2] = -1;
+        }
+        if (direction == Direction.E)
+        {
+            axis[0] = +1;
+            axis[1] = -1;
+            axis[2] = 0;
+        }
+        if (direction == Direction.SE)
+        {
+            axis[0] = 0;
+            axis[1] = -1;
+            axis[2] = +1;
+        }
+        if (direction == Direction.SW)
+        {
+            axis[0] = -1;
+            axis[1] = 0;
+            axis[2] = +1;
+        }
+        if (direction == Direction.W)
+        {
+            axis[0] = -1;   
+            axis[1] = 1;
+            axis[2] = 0;
+        }
+        if (direction == Direction.NW)
+        {
+            axis[0] = 0;
+            axis[1] = +1;
+            axis[2] = -1;
+        }
+        return axis;
     }
 
     public int DistanceTo(Hex end)
@@ -294,20 +387,6 @@ public class Hex : MonoBehaviour {
         return maxDist;
     }
 
-    private List<Hex> removeNeighbourDirections(List<KeyValuePair<Hex, string>> immediateNeighbours)
-    {
-        List<Hex> _immediateNeighbours = new List<Hex>();
-        foreach (KeyValuePair<Hex, string> pair in immediateNeighbours)
-        {
-            _immediateNeighbours.Add(pair.Key);
-        }
-        return _immediateNeighbours;
-    }    
-
-    public List<Hex> GetImmediateNeighboursNoDir()
-    {
-        return removeNeighbourDirections(GetImmediateNeighbours());
-    }
     #endregion
     #region Highlighting
 ////______________________________________________________________________________________________________________________________________________________________________________________________________________
@@ -477,7 +556,7 @@ public class Hex : MonoBehaviour {
             throw new Exception("Something tried to highlight attack area when the player is not in ATTACK mode!");
         GameControl.player.UnHighLightSurrounding();
 
-        List<Hex> attackableHexes = FilterAttackableHexes(GetDistantNeighbours(distance));
+        List<Hex> attackableHexes = FilterAttackableHexes(GetDistantNeighbours(distance, false));
         
         foreach (Hex neighbour in attackableHexes)
         {
@@ -580,15 +659,15 @@ public class Hex : MonoBehaviour {
     }
     public void DeleteHex()
     {
-        List<KeyValuePair<Hex, string>> neighbours = GetImmediateNeighbours();
+        List<KeyValuePair<Hex, string>> neighbours = GetImmediateNeighboursWithDirection();
         GameControl.map.RemoveFromMap(this);
         Destroy(this.gameObject);
         RestoreNeighbouringColliders(neighbours);
     }
 
     // These values are set by HexVertexDisplacer
-    public Mesh mesh;
-    public Vector3[] originalMesh;
+    [HideInInspector] public Mesh mesh;
+    [HideInInspector] public Vector3[] originalMesh;
     // // // // // // // // // // // // // // // //
 
     public void Hover()
@@ -670,6 +749,15 @@ public class Hex : MonoBehaviour {
         Destroy(GetComponent<SphereCollider>());
         Destroy(GetComponent<CapsuleCollider>());
         Destroy(GetComponent<Rigidbody>());
+    }
+
+    public Hex(int id_x, int id_y, int id_z)
+    // This constructor was created for UpdateHexRender specifically, not intended to be used
+    // elsewhere in the project.
+    {
+        x = id_x;
+        y = id_y;
+        z = id_z;
     }
 }
 

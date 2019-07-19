@@ -36,21 +36,19 @@ public class MouseManagerGameMode : MouseManager
         */
         {
             if (GameControl.turnController.currentActor != GameControl.player) return;
-
-            Ray ray = GameControl.mainCamera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hitInfo;
-            if (Physics.Raycast(ray, out hitInfo) && GUIUtility.hotControl == 0)
+            if (Input.GetMouseButtonDown(0))
             {
-                GameObject hitObject = hitInfo.transform.gameObject;
-
-                if (hitObject.tag == "Hex")
+                Ray ray = GameControl.mainCamera.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hitInfo;
+                if (Physics.Raycast(ray, out hitInfo) && GUIUtility.hotControl == 0)
                 {
-                    Hex hitHex = hitObject.GetComponent<Hex>();
-                    if (!hitHex) return;
-                    if (GameControl.playerState == "MOVE")
+                    GameObject hitObject = hitInfo.transform.gameObject;
+
+                    if (hitObject.tag == "Hex")
                     {
-                        if (Input.GetMouseButtonDown(0))
-                        // !!!!! COMBAT STATE BEHAVIOUR
+                        Hex hitHex = hitObject.GetComponent<Hex>();
+                        if (!hitHex) return;
+                        if (GameControl.playerState == "MOVE")
                         {
                             if (GameControl.selectedHex != hitHex && !hitHex.blocked && GameControl.player.highlightedNeighbours.Contains(hitHex))
                             {
@@ -62,24 +60,24 @@ public class MouseManagerGameMode : MouseManager
                                 else GameControl.player.MoveTo(hitHex);
                             }
                         }
-                    }
 
-                    else if (GameControl.playerState == "ATTACK")
-                    {
-                        if (Input.GetMouseButtonDown(0))
+                        else if (GameControl.playerState == "ATTACK")
                         {
-                            if (hitHex.occupyingCharacter != null) GameControl.player.Attack(hitHex.occupyingCharacter);
-                            else return;
+                            if (Input.GetMouseButtonDown(0))
+                            {
+                                if (hitHex.occupyingCharacter != null) GameControl.player.Attack(hitHex.occupyingCharacter);
+                                else return;
+                            }
                         }
                     }
-                }
-                else if (hitObject.tag == "Enemy")
-                {
-                    if (GameControl.playerState == "ATTACK")
+                    else if (hitObject.tag == "Enemy")
                     {
-                        if (Input.GetMouseButtonDown(0))
+                        if (GameControl.playerState == "ATTACK")
                         {
-                            GameControl.player.Attack(hitObject.gameObject.GetComponent<Enemy>());
+                            if (Input.GetMouseButtonDown(0))
+                            {
+                                GameControl.player.Attack(hitObject.gameObject.GetComponent<Enemy>());
+                            }
                         }
                     }
                 }
@@ -92,30 +90,32 @@ public class MouseManagerGameMode : MouseManager
          * 
         */
         {
-            Ray ray = GameControl.mainCamera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hitInfo;
-            if (Physics.Raycast(ray, out hitInfo) && GUIUtility.hotControl == 0)
+            if (Input.GetMouseButtonDown(0))
+            // !!!!! EXPLORATION STATE BEHAVIOUR
             {
-                GameObject hitObject = hitInfo.transform.gameObject;
-
-                if (hitObject.tag == "Hex" && GameControl.playerState != "ATTACK")
+                Ray ray = GameControl.mainCamera.ScreenPointToRay(Input.mousePosition);
+                RaycastHit hitInfo;
+                if (Physics.Raycast(ray, out hitInfo) && GUIUtility.hotControl == 0)
                 {
-                    Hex hitHex = hitObject.GetComponent<Hex>();
-                    if (!hitHex) return;
-                    if (Input.GetMouseButtonDown(0))
-                    // !!!!! EXPLORATION STATE BEHAVIOUR
+                    GameObject hitObject = hitInfo.transform.gameObject;
+
+                    if (hitObject.tag == "Hex" && GameControl.playerState != "ATTACK")
                     {
-                        if (GameControl.selectedHex != hitHex && !hitHex.blocked && GameControl.player.highlightedNeighbours.Contains(hitHex))
-                        {
-                            if (hitHex.Selected()) GameControl.selectedHex = hitHex;
-                            else GameControl.selectedHex = null;
+                        Hex hitHex = hitObject.GetComponent<Hex>();
+                        if (!hitHex) return;
+
+                            if (GameControl.selectedHex != hitHex && !hitHex.blocked && GameControl.player.highlightedNeighbours.Contains(hitHex))
+                            {
+                                if (hitHex.Selected()) GameControl.selectedHex = hitHex;
+                                else GameControl.selectedHex = null;
+                            }
+                            else if (GameControl.selectedHex == hitHex)
+                            {
+                                if (hitHex.occupyingCharacter != null) return;
+                                else GameControl.player.MoveTo(hitHex);
+                            }
                         }
-                        else if (GameControl.selectedHex == hitHex)
-                        {
-                            if (hitHex.occupyingCharacter != null) return;
-                            else GameControl.player.MoveTo(hitHex);
-                        }
-                    }
+
                 }
             }
         }

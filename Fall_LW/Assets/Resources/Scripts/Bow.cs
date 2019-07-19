@@ -19,7 +19,7 @@ public class Bow : Weapon
         base.Awake();
         correctRotationInEuler = new Vector3(6.837f, 68.21101f, 166.318f);
         correctPosition = new Vector3(0.445f, -0.01f, 0.194f);
-        arrowPrefab = (GameObject) Resources.Load("1_PREFABS/5_Weapons/ArrowPREFAB");
+        arrowPrefab = (GameObject) Resources.Load("Prefabs/Weapons/Arrow");
         damage = stats.damage;
         attackDistance = stats.attackDistance;
         damageBonusModifier = stats.damageBonusModifier;
@@ -53,10 +53,12 @@ public class Bow : Weapon
 
         if (RNG > enemy.currentPosition.chanceToHit)
         {
+            Debug.Log("Arrow is supposed to miss");
             missDirection = missDirections[Random.Range(0, missDirections.Count)] * 5;
         }
         else
         {
+            Debug.Log("Arrow is supposed to hit");
             missDirection = Vector3.zero;
         }
 
@@ -65,7 +67,7 @@ public class Bow : Weapon
         arrow = Instantiate(arrowPrefab, pos, arrowRotation, discardPool.transform);
         if (missDirection == Vector3.zero) arrow.GetComponent<Arrow>().IgnoreTerrainObjectsAndTerrain();
         else arrow.GetComponent<Arrow>().IgnoreCharacters();
-        arrow.SetActive(false);
+        arrow.SetActive(false); //to hide the arrow before the keyframe event
 
         return true;
     }

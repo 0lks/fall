@@ -37,20 +37,23 @@ public class HexVertexDisplacer : MonoBehaviour
             return;
         }
 
-        lowerSphereCollider(hex);
+        CheckIfOccupied(hex);
     }
 
-    private void lowerSphereCollider(Hex hex)
+    private void CheckIfOccupied(Hex hex)
     {
+        /*
         SphereCollider sc = hex.GetComponent<SphereCollider>();
         Vector3 groundPos = hex.GetComponentInChildren<MeshRenderer>().bounds.center;
         float dist = Vector3.Distance(hex.transform.position, groundPos);
         sc.center = new Vector3(sc.center.x, sc.center.y - dist, sc.center.z);
-        
+        */
         CapsuleCollider cc = hex.GetComponent<CapsuleCollider>();
         Rigidbody rb = hex.gameObject.AddComponent<Rigidbody>();
+        rb.isKinematic = true;
         rb.useGravity = false;
-        cc.center = new Vector3(sc.center.x, sc.center.y + 3f, sc.center.z);
+        //cc.center = new Vector3(sc.center.x, sc.center.y + 3f, sc.center.z);
+        cc.center = mesh.bounds.center;
 
         Destroy(cc);
         Destroy(rb);

@@ -56,6 +56,7 @@ public abstract class Character : MonoBehaviour
             GameControl.canvas.DisableButtons();
             GameControl.gameControl.DisableMouse();
             movementAmount -= GameControl.movePath.Count - 1;
+            GameControl.movePath.Dequeue(); //TODO: The first element is the current location - fix the problem in Graph.
             StartCoroutine(MoveCoroutine(GameControl.movePath));
         }
         else
@@ -73,10 +74,10 @@ public abstract class Character : MonoBehaviour
                     shortenedPath.Enqueue(path.Dequeue());
                 }
                 path = shortenedPath;
-
             }
 
             movementAmount -= path.Count - 1;
+            path.Dequeue(); //TODO: The first element is the current location - fix the problem in Graph.
             StartCoroutine(MoveCoroutine(path));
         }
 
@@ -145,14 +146,18 @@ public abstract class Character : MonoBehaviour
 
         while (Vector3.Distance(transform.position, destination) > min)
         {
-            rb.MovePosition(transform.position + (dir * animator.GetFloat("MovementSpeed") / 10 * Time.deltaTime));
+            rb.MovePosition(transform.position + (dir * animator.GetFloat("MovementSpeed") / 7 * Time.deltaTime));
             yield return null;
         }
 
         transform.position = destination;
         currentPosition.occupyingCharacter = null;
+        Hex lastPosition = currentPosition;
         currentPosition = nextTarget;
         currentPosition.occupyingCharacter = this;
+
+        Hex.Direction moveDirection = Hex.GetDirectionalRelation(lastPosition, currentPosition);
+        UpdateHexRender(currentPosition, moveDirection);
 
         if (GameControl.nearbyEnemies != null)
         {
@@ -192,5 +197,252 @@ public abstract class Character : MonoBehaviour
         Vector3 eulerAngles = rb.transform.rotation.eulerAngles;
         eulerAngles = new Vector3(0, eulerAngles.y, eulerAngles.z);
         rb.transform.rotation = Quaternion.Euler(eulerAngles);
+    }
+
+    private void UpdateHexRender(Hex newPos, Hex.Direction moveDirection)
+    // Kontrollida: kui tegemist on vaenalasega, siis renderi niipalju hexe kui on
+    // selle vaenlase max liikumisraadius. Mängija jaoks tekita eraldi inspektoris muudetav
+    // väärtus, mis ulatub kaugemale kui max liikumiskaugus
+    {
+        int renderDistance = GameControl.queueInDistance + 10;
+
+        Hex.Direction forwardLeft;
+        Hex.Direction forwardRight;
+        Hex.Direction backwardLeft;
+        Hex.Direction backwardRight;
+        Hex.Direction oppositeDir;
+        if (moveDirection == Hex.Direction.NE)
+        {
+            oppositeDir = Hex.Direction.SW;
+            forwardLeft = Hex.Direction.W;
+            forwardRight = Hex.Direction.SE;
+            backwardLeft = Hex.Direction.E;
+            backwardRight = Hex.Direction.NW;
+        }
+        else if (moveDirection == Hex.Direction.E)
+        {
+            oppositeDir = Hex.Direction.W;
+            forwardLeft = Hex.Direction.NW;
+            forwardRight = Hex.Direction.SW;
+            backwardLeft = Hex.Direction.SE;
+            backwardRight = Hex.Direction.NE;
+        }
+        else if (moveDirection == Hex.Direction.SE)
+        {
+            oppositeDir = Hex.Direction.NW;
+            forwardLeft = Hex.Direction.NE;
+            forwardRight = Hex.Direction.W;
+            backwardLeft = Hex.Direction.SW;
+            backwardRight = Hex.Direction.E;
+        }
+        else if (moveDirection == Hex.Direction.SW)
+        {
+            oppositeDir = Hex.Direction.NE;
+            forwardLeft = Hex.Direction.E;
+            forwardRight = Hex.Direction.NW;
+            backwardLeft = Hex.Direction.W;
+            backwardRight = Hex.Direction.SE;
+        }
+        else if (moveDirection == Hex.Direction.W)
+        {
+            oppositeDir = Hex.Direction.E;
+            forwardLeft = Hex.Direction.SE;
+            forwardRight = Hex.Direction.NE;
+            backwardLeft = Hex.Direction.NW;
+            backwardRight = Hex.Direction.SW;
+        }
+        else
+        {
+            oppositeDir = Hex.Direction.SE;
+            forwardLeft = Hex.Direction.SW;
+            forwardRight = Hex.Direction.E;
+            backwardLeft = Hex.Direction.NE;
+            backwardRight = Hex.Direction.W;
+        }
+
+        Hex forwardHex;
+        Hex backwardHex;
+        Hex neighbour;
+
+        if (this.GetType().Name == "Enemy")
+        {
+            Debug.Log("Rendering for an enemy.");
+            /*
+             * Turn on new neighbours 
+            */
+            //bool forwardIsTemp = false;
+
+            try
+            {
+                forwardHex = newPos.GetNeighbour(moveDirection, renderDistance);
+                forwardHex.gameObject.SetActive(true);
+            }
+            catch
+            {
+                /*
+                 * There is no existing hex in this forward position, therefore we
+                 * create a temporary one with just the data necessary for the calculations below.
+                 * We don't instantiate this hex or add it to the map. It is removed at the end of this function.
+                */
+
+                int[] axis = Hex.GetAxis(moveDirection);
+                forwardHex = new Hex(
+                    newPos.x + axis[0] * renderDistance,
+                    newPos.y + axis[1] * renderDistance,
+                    newPos.z + axis[2] * renderDistance);
+                //Debug.Log("getNeighbour did not find a forward hex, creating a temporary one");
+                //forwardIsTemp = true;
+            }
+            //if (!forwardIsTemp) forwardHex.gameObject.SetActive(true);
+
+
+            for (int i = renderDistance; i > 0; i--)
+            {
+                try
+                {
+                    neighbour = forwardHex.GetNeighbour(forwardLeft, i);
+                    neighbour.gameObject.SetActive(true);
+                }
+                catch { }
+                try
+                {
+                    neighbour = forwardHex.GetNeighbour(forwardRight, i);
+                    neighbour.gameObject.SetActive(true);
+                }
+                catch { }
+            }
+
+            /*
+             * Turn off old neighbours
+            */
+
+            try
+            {
+                backwardHex = newPos.GetNeighbour(oppositeDir, renderDistance + 1);
+                if (!GameControl.playerSurroundingHexes.Contains(backwardHex)) backwardHex.gameObject.SetActive(false);
+            }
+            catch
+            {
+                /*
+                 * There is no existing hex in this backward position, therefore we
+                 * create a temporary one with just the data necessary for the calculations below.
+                 * We don't instantiate this hex or add it to the map. It is removed at the end of this function.
+                */
+                int[] axis = Hex.GetAxis(oppositeDir);
+                backwardHex = new Hex(
+                    newPos.x + axis[0] * (renderDistance + 1),
+                    newPos.y + axis[1] * (renderDistance + 1),
+                    newPos.z + axis[2] * (renderDistance + 1));
+            }
+
+            for (int i = renderDistance; i > 0; i--)
+            {
+                try
+                {
+                    neighbour = backwardHex.GetNeighbour(backwardLeft, i);
+                    if (!GameControl.playerSurroundingHexes.Contains(neighbour)) neighbour.gameObject.SetActive(false);
+                }
+                catch { }
+                try
+                {
+                    neighbour = backwardHex.GetNeighbour(backwardRight, i);
+                    if (!GameControl.playerSurroundingHexes.Contains(neighbour)) neighbour.gameObject.SetActive(false);
+                }
+                catch { }
+            }
+        }
+        else
+        // Player radius
+        {
+            /*
+             * Turn on new neighbours 
+            */
+            //bool forwardIsTemp = false;
+
+            try
+            {
+                forwardHex = newPos.GetNeighbour(moveDirection, renderDistance);
+                forwardHex.gameObject.SetActive(true);
+                GameControl.playerSurroundingHexes.Add(forwardHex);
+            }
+            catch
+            {
+                /*
+                 * There is no existing hex in this forward position, therefore we
+                 * create a temporary one with just the data necessary for the calculations below.
+                 * We don't instantiate this hex or add it to the map. It is removed at the end of this function.
+                */
+
+                int[] axis = Hex.GetAxis(moveDirection);
+                forwardHex = new Hex(
+                    newPos.x + axis[0] * renderDistance,
+                    newPos.y + axis[1] * renderDistance,
+                    newPos.z + axis[2] * renderDistance);
+                //Debug.Log("getNeighbour did not find a forward hex, creating a temporary one");
+                //forwardIsTemp = true;
+            }
+            //if (!forwardIsTemp) forwardHex.gameObject.SetActive(true);
+
+
+            for (int i = renderDistance; i > 0; i--)
+            {
+                try
+                {
+                    neighbour = forwardHex.GetNeighbour(forwardLeft, i);
+                    neighbour.gameObject.SetActive(true);
+                    GameControl.playerSurroundingHexes.Add(neighbour);
+                }
+                catch {}
+                try
+                {
+                    neighbour = forwardHex.GetNeighbour(forwardRight, i);
+                    neighbour.gameObject.SetActive(true);
+                    GameControl.playerSurroundingHexes.Add(neighbour);
+                }
+                catch {}
+            }
+            
+            /*
+             * Turn off old neighbours
+            */
+
+            try
+            {
+                backwardHex = newPos.GetNeighbour(oppositeDir, renderDistance + 1);
+                backwardHex.gameObject.SetActive(false);
+                GameControl.playerSurroundingHexes.Remove(backwardHex);
+            }
+            catch
+            {
+                /*
+                 * There is no existing hex in this backward position, therefore we
+                 * create a temporary one with just the data necessary for the calculations below.
+                 * We don't instantiate this hex or add it to the map. It is removed at the end of this function.
+                */
+                int[] axis = Hex.GetAxis(oppositeDir);
+                backwardHex = new Hex(
+                    newPos.x + axis[0] * (renderDistance + 1),
+                    newPos.y + axis[1] * (renderDistance + 1),
+                    newPos.z + axis[2] * (renderDistance + 1));
+            }
+
+            for (int i = renderDistance; i > 0; i--)
+            {
+                try
+                {
+                    neighbour = backwardHex.GetNeighbour(backwardLeft, i);
+                    neighbour.gameObject.SetActive(false);
+                    GameControl.playerSurroundingHexes.Remove(neighbour);
+                }
+                catch {}
+                try
+                {
+                    neighbour = backwardHex.GetNeighbour(backwardRight, i);
+                    neighbour.gameObject.SetActive(false);
+                    GameControl.playerSurroundingHexes.Remove(neighbour);
+                }
+                catch {}
+            }
+        }
     }
 }

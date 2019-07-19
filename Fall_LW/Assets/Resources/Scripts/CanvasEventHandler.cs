@@ -7,7 +7,6 @@ public class CanvasEventHandler : MonoBehaviour
     public GameObject menu;
     public GameObject mainMenu;
     public GameObject settings;
-
     public GameObject gameUI;
     public Button attackButton;
     public Button moveButton;
@@ -15,12 +14,10 @@ public class CanvasEventHandler : MonoBehaviour
     public Button turnButton;
     public Button camLockButton;
     public GameObject enemyAlert;
-
     public GameObject deathScreen;
     public GameObject victoryScreen;
     public GameObject hpBar;
     public GameObject subMenu;
-
     //public TMP_InputField enemyCountField;
     public InputField enemyCountField;
     public Toggle populateToggle;

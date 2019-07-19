@@ -15,7 +15,7 @@ MonoBehaviour:
   k_AssetVersion: 4
   m_RendererType: 0
   m_RendererData: {fileID: 11400000, guid: f9e58f9e6956e754ca7e8cc715de897a, type: 2}
-  m_RequireDepthTexture: 1
+  m_RequireDepthTexture: 0
   m_RequireOpaqueTexture: 0
   m_OpaqueDownsampling: 0
   m_SupportsHDR: 0

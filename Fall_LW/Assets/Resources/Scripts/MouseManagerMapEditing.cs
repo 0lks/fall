@@ -39,32 +39,37 @@ public class MouseManagerMapEditing : MouseManager
     {
         if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
 
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hitInfo;
-        if (Physics.Raycast(ray, out hitInfo) && GUIUtility.hotControl == 0)
+        //Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Input.GetMouseButtonDown(0) | Input.GetMouseButton(0) | Input.GetMouseButtonDown(1) | Input.GetMouseButton(1))
         {
-            GameObject hitObject = hitInfo.transform.gameObject;
-
-            if (hitObject.tag == "Hex")
+            Ray ray = GameControl.orthoCamera.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hitInfo;
+            if (Physics.Raycast(ray, out hitInfo) && GUIUtility.hotControl == 0)
             {
-                if (Input.GetMouseButtonDown(0) | Input.GetMouseButton(0))
+                GameObject hitObject = hitInfo.transform.gameObject;
+
+                if (hitObject.tag == "Hex")
                 {
-                    if (hitInfo.collider.GetType() == typeof(SphereCollider))
+                    if (Input.GetMouseButtonDown(0) | Input.GetMouseButton(0))
                     {
-                        if (hitInfo.collider.transform.parent.GetComponent<Hex>() != null)
+                        if (hitInfo.collider.GetType() == typeof(SphereCollider))
                         {
-                            string colliderDirection = DetermineDirection(hitInfo.collider);
-                            BuildHex(colliderDirection, hitInfo.transform.parent.gameObject);
+                            if (hitInfo.collider.transform.parent.GetComponent<Hex>() != null)
+                            {
+                                //string colliderDirection = DetermineDirection(hitInfo.collider);
+                                Hex.Direction colliderDirection = DetermineDirection(hitInfo.collider);
+                                BuildHex(colliderDirection, hitInfo.transform.parent.gameObject);
+                            }
                         }
                     }
-                }
-                if (Input.GetMouseButtonDown(1) | Input.GetMouseButton(1))
-                {
-                    if (hitInfo.collider.tag == "Hex")
+                    if (Input.GetMouseButtonDown(1) | Input.GetMouseButton(1))
                     {
-                        if (hitObject.GetComponent<Hex>() != null)
+                        if (hitInfo.collider.tag == "Hex")
                         {
-                            RightClickHex(hitObject);
+                            if (hitObject.GetComponent<Hex>() != null)
+                            {
+                                RightClickHex(hitObject);
+                            }
                         }
                     }
                 }
@@ -78,27 +83,25 @@ public class MouseManagerMapEditing : MouseManager
         hitHex.DeleteHex();
     }
 
-    string DetermineDirection(Collider collider)
+    Hex.Direction DetermineDirection(Collider collider)
     {
         // Read in the collider data
-        SphereCollider sphereCollider = (SphereCollider) collider;
+        SphereCollider sphereCollider = (SphereCollider)collider;
         Vector3 center = sphereCollider.center;
         float x = center.x;
         float z = center.z;
 
         // Use that data to determine which direction the collider represents
-        string direction = "";
-        if (x > 0 & z > 0) direction = "NE";
-        else if (x > 0 & z == 0) direction = "E";
-        else if (x > 0 & z < 0) direction = "SE";
-        else if (x < 0 & z < 0) direction = "SW";
-        else if (x < 0 & z == 0) direction = "W";
-        else if (x < 0 & z > 0) direction = "NW";
-        
-        return direction;
+        if (x > 0 & z > 0) return Hex.Direction.NE;
+        else if (x > 0 & z == 0) return Hex.Direction.E;
+        else if (x > 0 & z < 0) return Hex.Direction.SE;
+        else if (x < 0 & z < 0) return Hex.Direction.SW;
+        else if (x < 0 & z == 0) return Hex.Direction.W;
+        else if (x < 0 & z > 0) return Hex.Direction.NW;
+        else throw new System.Exception("Could not determine the direction of the collider.");
     }
-
-    void BuildHex(string direction, GameObject origin)
+    /*
+    void BuildHex(Hex.Direction direction, GameObject origin)
     {
         Hex originHex = origin.GetComponent<Hex>();
         Vector3 originPosition = origin.transform.position;
@@ -109,45 +112,108 @@ public class MouseManagerMapEditing : MouseManager
         GameObject newHex = Instantiate(GameControl.hexPrefab, originHex.transform.position, Quaternion.identity, GameControl.map.transform.Find("Hexes"));
         Hex newHexHex = newHex.GetComponent<Hex>();
 
-        if (direction == "NE")
+        if (direction == Hex.Direction.NE)
         {
             newHexHex.x = originX - 1;
             newHexHex.y = originY + 1;
             newHexHex.z = originZ;
             newHexHex.transform.position = originPosition + northeast;
         }
-        else if (direction == "E")
+        else if (direction == Hex.Direction.E)
         {
             newHexHex.x = originX;
             newHexHex.y = originY + 1;
             newHexHex.z = originZ + 1;
             newHex.transform.position = originPosition + east;
         }
-        else if (direction == "SE")
+        else if (direction == Hex.Direction.SE)
         {
             newHexHex.x = originX + 1;
             newHexHex.y = originY;
             newHexHex.z = originZ + 1;
             newHex.transform.position = originPosition + southeast;
         }
-        else if (direction == "SW")
+        else if (direction == Hex.Direction.SW)
         {
             newHexHex.x = originX + 1;
             newHexHex.y = originY - 1;
             newHexHex.z = originZ;
             newHex.transform.position = originHex.transform.position + southwest;
         }
-        else if (direction == "W")
+        else if (direction == Hex.Direction.W)
         {
             newHexHex.x = originX;
             newHexHex.y = originY - 1;
             newHexHex.z = originZ - 1;
             newHex.transform.position = originHex.transform.position + west;
         }
-        else if (direction == "NW")
+        else if (direction == Hex.Direction.NW)
         {
             newHexHex.x = originX - 1;
             newHexHex.y = originY;
+            newHexHex.z = originZ - 1;
+            newHex.transform.position = originHex.transform.position + northwest;
+        }
+
+        newHexHex.setId();
+        newHexHex.name = newHexHex.id;
+
+        GameControl.map.AddHexToMap(newHexHex);
+        newHexHex.DisableOverlappingColliders();
+        newHexHex.Highlight();
+        GameControl.map.vertexDisplacer.DisplaceVertices(newHexHex);
+    }
+    */
+    void BuildHex(Hex.Direction direction, GameObject origin)
+    {
+        Hex originHex = origin.GetComponent<Hex>();
+        Vector3 originPosition = origin.transform.position;
+        int originX = originHex.x;
+        int originY = originHex.y;
+        int originZ = originHex.z;
+
+        GameObject newHex = Instantiate(GameControl.hexPrefab, originHex.transform.position, Quaternion.identity, GameControl.map.transform.Find("Hexes"));
+        Hex newHexHex = newHex.GetComponent<Hex>();
+
+        if (direction == Hex.Direction.NE)
+        {
+            newHexHex.x = originX + 1;
+            newHexHex.y = originY;
+            newHexHex.z = originZ - 1;
+            newHexHex.transform.position = originPosition + northeast;
+        }
+        else if (direction == Hex.Direction.E)
+        {
+            newHexHex.x = originX + 1;
+            newHexHex.y = originY - 1;
+            newHexHex.z = originZ;
+            newHex.transform.position = originPosition + east;
+        }
+        else if (direction == Hex.Direction.SE)
+        {
+            newHexHex.x = originX;
+            newHexHex.y = originY - 1;
+            newHexHex.z = originZ + 1;
+            newHex.transform.position = originPosition + southeast;
+        }
+        else if (direction == Hex.Direction.SW)
+        {
+            newHexHex.x = originX - 1;
+            newHexHex.y = originY;
+            newHexHex.z = originZ + 1;
+            newHex.transform.position = originHex.transform.position + southwest;
+        }
+        else if (direction == Hex.Direction.W)
+        {
+            newHexHex.x = originX - 1;
+            newHexHex.y = originY + 1;
+            newHexHex.z = originZ;
+            newHex.transform.position = originHex.transform.position + west;
+        }
+        else if (direction == Hex.Direction.NW)
+        {
+            newHexHex.x = originX;
+            newHexHex.y = originY + 1;
             newHexHex.z = originZ - 1;
             newHex.transform.position = originHex.transform.position + northwest;
         }

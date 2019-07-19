@@ -18,24 +18,32 @@ public class Arrow : MonoBehaviour
 
     public void IgnoreCharacters()
     {
+        Physics.IgnoreLayerCollision(12, 14, false);
+        Physics.IgnoreLayerCollision(12, 11, false);
+        Physics.IgnoreLayerCollision(12, 18, false);
         Physics.IgnoreLayerCollision(10, 12, true);
+        Physics.IgnoreLayerCollision(10, 19, true);
     }
     public void IgnoreTerrainObjectsAndTerrain()
     {
         Physics.IgnoreLayerCollision(12, 14, true);
         Physics.IgnoreLayerCollision(12, 11, true);
         Physics.IgnoreLayerCollision(12, 18, true);
+        Physics.IgnoreLayerCollision(10, 12, false);
+        Physics.IgnoreLayerCollision(10, 19, false);
     }
-
+    /*
     public void ResetCollision()
     {
         Physics.IgnoreLayerCollision(10, 12, false);
         Physics.IgnoreLayerCollision(12, 14, false);
         Physics.IgnoreLayerCollision(12, 11, false);
+        Physics.IgnoreLayerCollision(10, 19, false);
     }
-
+    */
     private void OnTriggerEnter(Collider collision)
     {
+        Debug.Log("Arrow trigger event");
         if (collision.tag == "Player") return;
 
         // Freeze the arrow in place
@@ -64,7 +72,7 @@ public class Arrow : MonoBehaviour
             }
         }
 
-        ResetCollision();
+        //ResetCollision();
         GameControl.turnController.NextActorTurn();
     }
 }

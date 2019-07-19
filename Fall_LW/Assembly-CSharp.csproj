@@ -62,7 +62,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Other, Unsorted\DAX\Editor Extensions\Multy Objects Renaming Tool\DAX_MultiObjectsRenamer.cs" />
     <Compile Include="Assets\Other, Unsorted\PostProcessing\Runtime\Attributes\GetSetAttribute.cs" />
     <Compile Include="Assets\Other, Unsorted\PostProcessing\Runtime\Attributes\MinAttribute.cs" />
     <Compile Include="Assets\Other, Unsorted\PostProcessing\Runtime\Attributes\TrackballAttribute.cs" />

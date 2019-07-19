@@ -27,17 +27,21 @@ public class GameControl : MonoBehaviour {
     public static Queue<Hex> movePath;
     public static int queueInDistance;
     public int _queueInDistance;
-    public string playerSpawnPoint;
+    public int[,] playerSpawnPoint = new int[1,3];
+    public int playerSpawnX;
+    public int playerSpawnY;
+    public int playerSpawnZ;
 
     /*
      * Enemy Spawning
     */
-    [HideInInspector]
-    public bool POPULATE;
-    public static int enemyCount = 1;
-    [HideInInspector]
-    public bool distributeRandomly;
-    public string[] spawnPoints;
+    [HideInInspector] public bool POPULATE = false;
+    public static int enemyCount = 0;
+    public int predefinedSpawnsCount = 0;
+    [HideInInspector] public bool distributeRandomly;
+    //public int[,] predefinedSpawnPoints;
+    Stack<int[]> predefinedSpawnPoints = new Stack<int[]>();
+    public string[] predefinedSpawnPointsAsStrings;
     // // // // // // // // // // // // // // // 
 
     private static string _playerState = "EXPLORING";
@@ -101,10 +105,8 @@ public class GameControl : MonoBehaviour {
         }
     }
 
-    [HideInInspector]
-    public static Camera mainCamera;
-    [HideInInspector]
-    public static Camera orthoCamera;
+    [HideInInspector] public static Camera mainCamera;
+    [HideInInspector] public static Camera orthoCamera;
     public static GameObject discardPool;
     private GameObject wolf;
 
@@ -114,10 +116,18 @@ public class GameControl : MonoBehaviour {
     void Awake () {
         hexPrefab = (GameObject) Resources.Load("Prefabs/Other/Hex/Hex");
         wolf = (GameObject) Resources.Load("Prefabs/Characters/Wolf/Wolf");
-        //xRay = (Shader)Resources.Load("Custom Shaders/XRay");
-        //noXRay = (Shader)Resources.Load("Materials/XRay/NOXRay");
         queueInDistance = _queueInDistance;
-        Application.targetFrameRate = 60;
+        //Application.targetFrameRate = 60;
+        playerSpawnPoint[0, 0] = playerSpawnX;
+        playerSpawnPoint[0, 1] = playerSpawnY;
+        playerSpawnPoint[0, 2] = playerSpawnZ;
+
+        foreach (string spawnPoint_ in predefinedSpawnPointsAsStrings)
+        {
+            string[] spawnPoint = spawnPoint_.Split('_');
+            int[] spawnPointAsInts = System.Array.ConvertAll(spawnPoint, int.Parse);
+            predefinedSpawnPoints.Push(spawnPointAsInts);
+        }
 
         if (gameControl == null)
         {
@@ -146,7 +156,8 @@ public class GameControl : MonoBehaviour {
         mainCamera = allCameras[0];
         orthoCamera = allCameras[1];
         mainCamera.transform.gameObject.SetActive(false);
-        orthoCamera.transform.gameObject.SetActive(true);
+        //orthoCamera.transform.gameObject.SetActive(true);
+        orthoCamera.transform.gameObject.SetActive(false);
 
         discardPool = GameObject.FindGameObjectWithTag("DiscardPool");
 
@@ -162,7 +173,26 @@ public class GameControl : MonoBehaviour {
             canvas.ToggleUI();
         }
     }
-
+    /*
+    private void RenderHexes(int dist)
+    {
+        foreach (Hex hex in GameControl.player.currentPosition.GetDistantNeighbours(dist))
+        {
+            hex.GetComponentInChildren<MeshRenderer>().enabled = true;
+        }
+    }
+    */
+    public static HashSet<Hex> playerSurroundingHexes = new HashSet<Hex>();
+    private void RenderHexes(int dist)
+    {
+        foreach (Hex hex in map.GetAllHexes()) hex.gameObject.SetActive(false);
+        foreach (Hex hex in player.currentPosition.GetDistantNeighbours(dist, true))
+        {
+            hex.gameObject.SetActive(true);
+            playerSurroundingHexes.Add(hex);
+        }
+    }
+    
     public void InitilizeBaseGameState()
     // Called by StartGame(), resets the game to its original state
     {
@@ -170,12 +200,26 @@ public class GameControl : MonoBehaviour {
         canvas.ResetColors();
         player.GetComponent<Animator>().SetFloat("MovementSpeed", 20f);
         activeMouseMode = "Game";
+
+        /*
         if (playerSpawnPoint != null && map.HexExists(playerSpawnPoint))
         {
             player.NewCurrentPosition(map.GetHex(playerSpawnPoint));
         }
         else player.NewCurrentPosition(map.GetAllHexes()[0]);
+        */
+        if (playerSpawnPoint != null && map.HexExists(playerSpawnPoint[0, 0], playerSpawnPoint[0, 1], playerSpawnPoint[0, 2]))
+        {
+            player.NewCurrentPosition(map.GetHex(playerSpawnPoint[0, 0], playerSpawnPoint[0, 1], playerSpawnPoint[0, 2]));
+        }
+        else
+        {
+            Debug.Log("Spawning nowhere");
+            player.NewCurrentPosition(map.GetAllHexes()[0]);
+        }
+
         player.transform.position = player.currentPosition.GetPositionOnGround();
+
         mainCamera.GetComponent<PerspectiveCameraMovement>().SetInitialPosition(player);
 
         player.sneaking = false;
@@ -209,6 +253,9 @@ public class GameControl : MonoBehaviour {
         player.healthBar.UpdateBar(player.remainingHealth, player.stats.baseHealthAmount);
 
         NewPlayerState("EXPLORING");
+
+        //Debug.Log(queueInDistance + 10);
+        RenderHexes(queueInDistance + 10);
     }
 
     public void SaveLevel()
@@ -252,7 +299,8 @@ public class GameControl : MonoBehaviour {
         else
         {
             // Keep track of the hexes that are going to be occupied by an enemy
-            randomHexes = map.GetRandomHexes(enemyCount);
+            //randomHexes = map.GetRandomHexes(enemyCount);
+            /*
             for (int i = 0; i < spawnPoints.Length; i++)
             // First occupy the hexes that definitely must contain an enemy
             {
@@ -278,19 +326,50 @@ public class GameControl : MonoBehaviour {
                     randomHexes.RemoveAt(randomHexes.Count - 1);
                 }
             }
-            if (randomHexes.Count == 0) return;
-            else
-            // There need to be more enemies than the number of predefined spawnpoints.
-            // For this we use the random hexes we found before.
+            */
+
+            int totalSpawnCounter = enemyCount;
+            int predefinedSpawnCounter = predefinedSpawnsCount;
+            HashSet<Hex> usedSpawns = new HashSet<Hex>();
+
+            while (totalSpawnCounter-- > 0)
             {
-                while (randomHexes.Count > 0)
+                if (predefinedSpawnCounter-- > 0)
+                // There are some unoccupied points where enemies have to spawn
                 {
+                    int[] spawnPoint = predefinedSpawnPoints.Pop();
+                    if (map.HexExists(spawnPoint[0], spawnPoint[1], spawnPoint[2]))
+                    {
+                        Hex spawn = map.GetHex(spawnPoint[0], spawnPoint[1], spawnPoint[2]);
+                        Enemy _enemy = Instantiate(enemy, map.transform.Find("Characters"));
+                        _enemy.NewCurrentPosition(map.GetHex(spawnPoint[0], spawnPoint[1], spawnPoint[2]));
+                        _enemy.transform.position = _enemy.currentPosition.GetPositionOnGround();
+                        allEnemies.Add(_enemy);
+                        usedSpawns.Add(spawn);
+                    }
+                    else
+                    {
+                        Debug.Log("Could not find the hex corresponding to the coordinates provided as a spawn point.");
+                        //... find random (see below: copy over?)
+                    }
+                }
+
+                else
+                {
+                    //TODO: ADD A MAP METHOD TO GET JUST ONE RANDOM HEX
+                    Hex randomHex = map.GetRandomHexes(1)[0];
+                    //TODO: ADD A CHECK TO PREVENT ENDLESS LOOPS IN A SMALLER MAP WHERE THIS RETURNS THE SAME HEXES AGAIN AND AGAIN
+                    while (usedSpawns.Contains(randomHex))
+                    {
+                        //Debug.Log(randomHex.name);
+                        randomHex = map.GetRandomHexes(1)[0];
+                    }
+
                     Enemy _enemy = Instantiate(enemy, map.transform.Find("Characters"));
-                    Hex randomHex = randomHexes[randomHexes.Count - 1];
                     _enemy.NewCurrentPosition(randomHex);
                     _enemy.transform.position = _enemy.currentPosition.GetPositionOnGround();
                     allEnemies.Add(_enemy);
-                    randomHexes.RemoveAt(randomHexes.Count - 1);
+                    usedSpawns.Add(randomHex);
                 }
             }
         }
@@ -387,6 +466,25 @@ public class GameControl : MonoBehaviour {
                     SaveLevel();
                 }
                 orthoDistancePlus = GUI.HorizontalSlider(new Rect(85, 10, 50, 50), orthoDistancePlus, 0f, 100f);
+
+                /*
+                if (GUI.Button(new Rect(140, 10, 70, 50), "RESET MAP"))
+                {
+                    List<Hex> allHexes = map.GetAllHexes();
+                    Hex survivorHex = map.GetRandomHexes(1)[0];
+                    allHexes.Remove(survivorHex);
+
+                    foreach (Hex hex in allHexes)
+                    {
+                        hex.DeleteHex();
+                    }
+
+                    survivorHex.x = 0;
+                    survivorHex.y = 0;
+                    survivorHex.z = 0;
+                    survivorHex.id = "0_0_0";
+                }
+                */
             }
         }
     }
