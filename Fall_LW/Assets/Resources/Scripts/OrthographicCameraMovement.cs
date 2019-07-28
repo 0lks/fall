@@ -1,5 +1,9 @@
 ﻿using UnityEngine;
 
+// Internal dependencies
+using FALL.Core;
+using FALL.Characters;
+
 public class OrthographicCameraMovement : MonoBehaviour {
     public float horizontalSpeed;
     public float verticalSpeed;
@@ -15,7 +19,8 @@ public class OrthographicCameraMovement : MonoBehaviour {
 
     private void Start()
     {
-        if (jumpTarget == null) jumpTarget = GameControl.player.gameObject;
+        //if (jumpTarget == null) jumpTarget = GameControl.player.gameObject;
+        if (jumpTarget == null) jumpTarget = GameControl.map.GetHex(0,0,0).gameObject;
         jumpToTarget();
     }
 

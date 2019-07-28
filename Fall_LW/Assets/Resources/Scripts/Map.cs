@@ -5,11 +5,15 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Collections;
 
+// Internal dependencies
+using FALL.Core;
+
 public class Map : MonoBehaviour {
     //public Dictionary<string, Hex> map = new Dictionary<string, Hex>();
     public Dictionary<int, Dictionary<int, Dictionary<int, Hex>>> map = new Dictionary<int, Dictionary<int, Dictionary<int, Hex>>>();
     public MapSerializedContent data = new MapSerializedContent();
     public HexVertexDisplacer vertexDisplacer;
+    public bool addedHexesThisSession = false;
 
     private void Awake()
     {
@@ -70,24 +74,15 @@ public class Map : MonoBehaviour {
         return false;
     }
     
-    public void Serialize()
+    public void Serialize(string fileName)
     {
         Debug.Log("Preparing map data for serialization...");
-        FileStream fileStream = new FileStream("start.dat", FileMode.Create);
+        FileStream fileStream = new FileStream(fileName, FileMode.Create);
         BinaryFormatter binaryFormatter = new BinaryFormatter();
-        
-        /*
-        foreach (KeyValuePair<string, Hex> hex in map)
-        {
-            hex.Value.prepSerialize();
-            data.map[hex.Key] = hex.Value.serialData;
-        }
-        */
 
         foreach (Hex hex in GetAllHexes())
         {
             hex.prepSerialize();
-            //data.newmap[hex.x][hex.y][hex.z] = hex.serialData;
             if (data.newmap.ContainsKey(hex.x))
             {
                 if (data.newmap[hex.x].ContainsKey(hex.y))
@@ -112,29 +107,6 @@ public class Map : MonoBehaviour {
         fileStream.Close();
         Debug.Log("Map has been serialized");
     }
-
-    /*
-    public void SetMap(MapSerializedContent data_)
-    {
-        // This gets run only once, when entering playmode
-        Transform parent = transform.Find("Hexes");
-        foreach (KeyValuePair<string, HexSerializedContent> deserializedHex in data_.map)
-        {
-            GameObject hexIsBack_ = Instantiate(GameControl.hexPrefab, parent);
-            //hexIsBack.GetComponentInChildren<MeshRenderer>().enabled = false;
-
-            //map[deserializedHex.Key] = hexIsBack.GetComponent<Hex>();
-            Hex hexIsBack = hexIsBack_.GetComponent<Hex>();
-            //map[hexIsBack.x][hexIsBack.y][hexIsBack.z] = hexIsBack.GetComponent<Hex>();
-            hexIsBack.GetComponent<Hex>().SetHex(deserializedHex.Value);
-            AddHexToMap(hexIsBack);
-            Destroy(hexIsBack.GetComponent<HexVertexDisplacer>());
-            //hexIsBack.gameObject.SetActive(false);
-        }
-
-        StartCoroutine(WaitAndConstructGraph());
-    }
-    */
     
     public void SetMap(MapSerializedContent data_)
     {
@@ -159,7 +131,7 @@ public class Map : MonoBehaviour {
         StartCoroutine(WaitAndConstructGraph());
     }
     
-    IEnumerator WaitAndConstructGraph()
+    public IEnumerator WaitAndConstructGraph()
     // We have to wait for all the triggers on the hexes to avoid inserting unnavigable (and untargetable) hexes
     // into the node graph.
     {

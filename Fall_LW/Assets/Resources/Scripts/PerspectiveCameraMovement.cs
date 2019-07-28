@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Internal dependencies
+using FALL.Core;
+using FALL.Characters;
+
 public class PerspectiveCameraMovement : MonoBehaviour
 {
     public float horizontalSpeed;
@@ -29,7 +33,6 @@ public class PerspectiveCameraMovement : MonoBehaviour
     {
         focusTarget = character;
         mod.y = cameraHeight / focusTargetHeightModifier;
-
         // Set "CameraArm" as the parent
         transform.SetParent(focusTarget.transform.GetChild(2));
 

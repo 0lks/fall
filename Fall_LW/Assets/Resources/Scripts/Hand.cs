@@ -1,6 +1,7 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+
+// Internal dependencies
+using FALL.Items.Weapons;
 
 public class Hand : MonoBehaviour
 {

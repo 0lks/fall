@@ -2,18 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Internal dependencies
+using FALL.Core;
+
+namespace FALL.Characters {
 public abstract class Character : MonoBehaviour
 {
     // Don't reinitialize or reassign stats to other variables downstream, reference this instead
     public CharacterDATA stats;
-    [HideInInspector]
-    public Rigidbody rb;
-    protected Animator animator;
-    protected TurnController turnController;
-    [HideInInspector]
-    public int movementAmount;
-    [HideInInspector]
-    public float remainingHealth;
+    [HideInInspector] public Rigidbody rb;
+    [HideInInspector] public Animator animator;
+    //protected TurnController turnController;
+    [HideInInspector] public int movementAmount;
+    [HideInInspector] public float remainingHealth;
 
     private Hex _currentPosition;
     public Hex currentPosition
@@ -35,11 +36,6 @@ public abstract class Character : MonoBehaviour
         animator = GetComponent<Animator>();
         movementAmount = stats.baseMovementAmount;
         remainingHealth = stats.baseHealthAmount;
-    }
-
-    protected void Start()
-    {
-        turnController = GameControl.turnController;
     }
 
     public virtual void RefreshStats()
@@ -87,8 +83,9 @@ public abstract class Character : MonoBehaviour
     public void Die()
     {
         currentPosition.occupyingCharacter = null;
-        turnController.RemoveFromQueue(this);
-        if (GetType() == typeof(Enemy)) {
+        GameControl.turnController.RemoveFromQueue(this);
+        if (GetType() == typeof(Enemy))
+        {
             GameControl.allEnemies.Remove(GetComponent<Enemy>());
             GameControl.nearbyEnemies.Remove(GetComponent<Enemy>());
 
@@ -101,7 +98,7 @@ public abstract class Character : MonoBehaviour
 
             if (GameControl.nearbyEnemies.Count == 0)
             {
-                GameControl.NewPlayerState("EXPLORING");
+                GameControl.NewPlayerState(GameControl.PlayerState.Exploring);
             }
             Destroy(gameObject);
         }
@@ -146,7 +143,7 @@ public abstract class Character : MonoBehaviour
 
         while (Vector3.Distance(transform.position, destination) > min)
         {
-            rb.MovePosition(transform.position + (dir * animator.GetFloat("MovementSpeed") / 7 * Time.deltaTime));
+            rb.MovePosition(transform.position + (dir * animator.GetFloat("MovementSpeed") / 3 * Time.deltaTime));
             yield return null;
         }
 
@@ -268,7 +265,7 @@ public abstract class Character : MonoBehaviour
         {
             Debug.Log("Rendering for an enemy.");
             /*
-             * Turn on new neighbours 
+                * Turn on new neighbours 
             */
             //bool forwardIsTemp = false;
 
@@ -280,9 +277,9 @@ public abstract class Character : MonoBehaviour
             catch
             {
                 /*
-                 * There is no existing hex in this forward position, therefore we
-                 * create a temporary one with just the data necessary for the calculations below.
-                 * We don't instantiate this hex or add it to the map. It is removed at the end of this function.
+                    * There is no existing hex in this forward position, therefore we
+                    * create a temporary one with just the data necessary for the calculations below.
+                    * We don't instantiate this hex or add it to the map. It is removed at the end of this function.
                 */
 
                 int[] axis = Hex.GetAxis(moveDirection);
@@ -313,7 +310,7 @@ public abstract class Character : MonoBehaviour
             }
 
             /*
-             * Turn off old neighbours
+                * Turn off old neighbours
             */
 
             try
@@ -324,9 +321,9 @@ public abstract class Character : MonoBehaviour
             catch
             {
                 /*
-                 * There is no existing hex in this backward position, therefore we
-                 * create a temporary one with just the data necessary for the calculations below.
-                 * We don't instantiate this hex or add it to the map. It is removed at the end of this function.
+                    * There is no existing hex in this backward position, therefore we
+                    * create a temporary one with just the data necessary for the calculations below.
+                    * We don't instantiate this hex or add it to the map. It is removed at the end of this function.
                 */
                 int[] axis = Hex.GetAxis(oppositeDir);
                 backwardHex = new Hex(
@@ -355,7 +352,7 @@ public abstract class Character : MonoBehaviour
         // Player radius
         {
             /*
-             * Turn on new neighbours 
+                * Turn on new neighbours 
             */
             //bool forwardIsTemp = false;
 
@@ -368,9 +365,9 @@ public abstract class Character : MonoBehaviour
             catch
             {
                 /*
-                 * There is no existing hex in this forward position, therefore we
-                 * create a temporary one with just the data necessary for the calculations below.
-                 * We don't instantiate this hex or add it to the map. It is removed at the end of this function.
+                    * There is no existing hex in this forward position, therefore we
+                    * create a temporary one with just the data necessary for the calculations below.
+                    * We don't instantiate this hex or add it to the map. It is removed at the end of this function.
                 */
 
                 int[] axis = Hex.GetAxis(moveDirection);
@@ -392,18 +389,18 @@ public abstract class Character : MonoBehaviour
                     neighbour.gameObject.SetActive(true);
                     GameControl.playerSurroundingHexes.Add(neighbour);
                 }
-                catch {}
+                catch { }
                 try
                 {
                     neighbour = forwardHex.GetNeighbour(forwardRight, i);
                     neighbour.gameObject.SetActive(true);
                     GameControl.playerSurroundingHexes.Add(neighbour);
                 }
-                catch {}
+                catch { }
             }
-            
+
             /*
-             * Turn off old neighbours
+                * Turn off old neighbours
             */
 
             try
@@ -415,9 +412,9 @@ public abstract class Character : MonoBehaviour
             catch
             {
                 /*
-                 * There is no existing hex in this backward position, therefore we
-                 * create a temporary one with just the data necessary for the calculations below.
-                 * We don't instantiate this hex or add it to the map. It is removed at the end of this function.
+                    * There is no existing hex in this backward position, therefore we
+                    * create a temporary one with just the data necessary for the calculations below.
+                    * We don't instantiate this hex or add it to the map. It is removed at the end of this function.
                 */
                 int[] axis = Hex.GetAxis(oppositeDir);
                 backwardHex = new Hex(
@@ -434,15 +431,16 @@ public abstract class Character : MonoBehaviour
                     neighbour.gameObject.SetActive(false);
                     GameControl.playerSurroundingHexes.Remove(neighbour);
                 }
-                catch {}
+                catch { }
                 try
                 {
                     neighbour = backwardHex.GetNeighbour(backwardRight, i);
                     neighbour.gameObject.SetActive(false);
                     GameControl.playerSurroundingHexes.Remove(neighbour);
                 }
-                catch {}
+                catch { }
             }
         }
     }
-}
+}}
+

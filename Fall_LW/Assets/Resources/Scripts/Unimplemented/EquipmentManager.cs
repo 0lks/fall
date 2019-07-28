@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Internal dependencies
+using FALL.Items.Weapons;
+
 public class EquipmentManager : MonoBehaviour
 // !! This class is NOT functional
 {

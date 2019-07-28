@@ -5,6 +5,10 @@ using System.Linq;
 using B83.MeshTools;
 using HexData;
 
+// Internal dependencies
+using FALL.Core;
+using FALL.Characters;
+
 public class Hex : MonoBehaviour {
     /*
      * LOCAL DATA
@@ -16,7 +20,7 @@ public class Hex : MonoBehaviour {
     [HideInInspector] public string id;
     [HideInInspector] public string hexType;
     [HideInInspector] public bool[] disabledColliders;
-    private SphereCollider[] sphereColliders;
+    SphereCollider[] sphereColliders;
     [HideInInspector] public Character occupyingCharacter;
     [HideInInspector] public bool blocked;
     [HideInInspector] public int chanceToHit;
@@ -25,12 +29,11 @@ public class Hex : MonoBehaviour {
     Queue<Hex> path;
     List<Hex> immediateNeighbours;
     MeshRenderer meshRend;
-
+    MeshFilter meshFilter;
     [HideInInspector] public enum HexType {Walkable, Black, Blocked, Editing, Hover, Danger, Att25, Att50, Att75, Att100, NULL}
     [HideInInspector] public HexType type;
     [HideInInspector] public HexType previousType;
     [HideInInspector] public enum Direction {NE, E, SE, SW, W, NW}
-
 
     public HexDataHolder hexData;
 
@@ -44,6 +47,7 @@ public class Hex : MonoBehaviour {
         GetComponentInChildren<MeshRenderer>().sharedMaterials[0] = hexData.black_Edge;
         GetComponentInChildren<MeshRenderer>().sharedMaterials[1] = hexData.black_Edge;
         meshRend = GetComponentInChildren<MeshRenderer>();
+        meshFilter = transform.GetChild(0).GetComponent<MeshFilter>();
         occupyingCharacter = null;
         sphereColliders = transform.GetChild(0).GetComponents<SphereCollider>();
         inEnemyRange = false;
@@ -52,7 +56,7 @@ public class Hex : MonoBehaviour {
     }
     private void Start()
     {
-        immediateNeighbours = GetImmediateNeighboursNoDir();
+        RefreshImmediateNeighbours();
     }
 
     #region File IO
@@ -75,7 +79,7 @@ public class Hex : MonoBehaviour {
 
         serialData.disabledColliders = disabledColliders;
 
-        byte[] bytes = MeshSerializer.SerializeMesh(GetComponentInChildren<MeshFilter>().mesh);
+        byte[] bytes = MeshSerializer.SerializeMesh(meshFilter.mesh);
         serialData.mesh = bytes;
         Vector3 groundPos = mesh.bounds.center;
         serialData.groundPos = new float[] { groundPos.x, groundPos.y, groundPos.z};
@@ -210,6 +214,10 @@ public class Hex : MonoBehaviour {
     #endregion
     #region Neighbours
     ////______________________________________________________________________________________________________________________________________________________________________________________________________________
+    public void RefreshImmediateNeighbours()
+    {
+        immediateNeighbours = GetImmediateNeighboursNoDir();
+    }
     public List<KeyValuePair<Hex, string>> GetImmediateNeighboursWithDirection()
     {
         List<KeyValuePair<Hex, string>> neighbours = new List<KeyValuePair<Hex, string>>();
@@ -394,7 +402,7 @@ public class Hex : MonoBehaviour {
     {
         if (blocked) return;
         type = newType;
-        Material[] materials = GetComponentInChildren<MeshRenderer>().sharedMaterials;
+        Material[] materials = meshRend.sharedMaterials;
 
         if (newType == HexType.Walkable)
         {
@@ -452,7 +460,7 @@ public class Hex : MonoBehaviour {
             materials[1] = hexData.base_Center;
         }
 
-        GetComponentInChildren<MeshRenderer>().sharedMaterials = materials;
+        meshRend.sharedMaterials = materials;
     }
 
     public bool Highlight()
@@ -480,7 +488,7 @@ public class Hex : MonoBehaviour {
             SwapMaterials(HexType.Hover);
             return true;
         }
-        else if (GameControl.playerState == "MOVE" || GameControl.playerState == "EXPLORING")
+        else if (GameControl.playerState == GameControl.PlayerState.Move || GameControl.playerState == GameControl.PlayerState.Exploring)
         {
             GameControl.player.highlightedNeighbours.Add(this);
 
@@ -496,7 +504,7 @@ public class Hex : MonoBehaviour {
             }
         }
 
-        else if (GameControl.playerState == "ATTACK")
+        else if (GameControl.playerState == GameControl.PlayerState.Attack)
         {
             if (chanceToHit == 25f)
             {
@@ -528,7 +536,7 @@ public class Hex : MonoBehaviour {
     }
     public void HighLightSurroundingMoveState(int distance)
     {
-        if ((GameControl.playerState != "MOVE") && (GameControl.playerState != "EXPLORING"))
+        if ((GameControl.playerState != GameControl.PlayerState.Move) && (GameControl.playerState != GameControl.PlayerState.Exploring))
             throw new Exception("Something tried to highlight movement area when the player is not in MOVE/EXPLORING mode!");
         GameControl.player.UnHighLightSurrounding();
 
@@ -552,7 +560,7 @@ public class Hex : MonoBehaviour {
 
     public void HighLightSurroundingAttackState(int distance)
     {
-        if (GameControl.playerState != "ATTACK")
+        if (GameControl.playerState != GameControl.PlayerState.Attack)
             throw new Exception("Something tried to highlight attack area when the player is not in ATTACK mode!");
         GameControl.player.UnHighLightSurrounding();
 
@@ -655,7 +663,7 @@ public class Hex : MonoBehaviour {
 
     public Vector3 GetPositionOnGround()
     {
-        return GetComponentInChildren<MeshRenderer>().bounds.center;
+        return meshRend.bounds.center;
     }
     public void DeleteHex()
     {
@@ -674,7 +682,7 @@ public class Hex : MonoBehaviour {
     {
         if (blocked
             || hovered
-            || GameControl.player.GetComponent<Animator>().GetBool("Moving")) return;
+            || GameControl.player.animator.GetBool("Moving")) return;
 
         hovered = true;
         previousType = type;
@@ -695,7 +703,7 @@ public class Hex : MonoBehaviour {
         hovered = false;
         Highlight();
         //Lower the mesh back on the ground
-        transform.GetChild(0).GetComponent<MeshFilter>().mesh.vertices = originalMesh;
+        meshFilter.mesh.vertices = originalMesh;
     }
 
     private void OnMouseEnter()
@@ -713,8 +721,8 @@ public class Hex : MonoBehaviour {
             }
 
         if ((
-            GameControl.playerState == "MOVE"
-            || GameControl.playerState == "EXPLORING")
+            GameControl.playerState == GameControl.PlayerState.Move
+            || GameControl.playerState == GameControl.PlayerState.Exploring)
             && GameControl.player.movementAmount > 0
             && type != HexType.Black
             && GameControl.activeMouseMode != "MapEditing"

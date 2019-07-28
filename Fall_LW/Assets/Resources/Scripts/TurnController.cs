@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Internal dependencies
+using FALL.Core;
+using FALL.Characters;
+
 public class TurnController : MonoBehaviour
 {
     public Character currentActor;
@@ -15,7 +19,7 @@ public class TurnController : MonoBehaviour
     {
         actorQueue = new Queue<Character>();
         currentActor = GameControl.player;
-        GameControl.NewPlayerState("MOVE");
+        GameControl.NewPlayerState(GameControl.PlayerState.Move);
     }
 
     public bool IsTurn(Character actor)
@@ -34,7 +38,7 @@ public class TurnController : MonoBehaviour
         actorQueue.Enqueue(currentActor);
         if (actorQueue.Count == 1)
         {
-            GameControl.NewPlayerState("EXPLORING");
+            GameControl.NewPlayerState(GameControl.PlayerState.Exploring);
             return;
         }
 

@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Internal dependencies
+using FALL.Core;
+using FALL.Characters;
+
+namespace FALL.Items.Weapons {
 public class Arrow : MonoBehaviour
 {
     Rigidbody rb;
@@ -55,8 +60,8 @@ public class Arrow : MonoBehaviour
         // Shot didn't miss
         {
             float modifier = 1f;
-            if (!enemy.hasDetectedPlayer) modifier = GameControl.player.wieldedWeapon.damageBonusModifier; 
-            enemy.remainingHealth -= GameControl.player.wieldedWeapon.damage * modifier;
+            if (!enemy.hasDetectedPlayer) modifier = GameControl.player.playerManager.wieldedWeapon.damageBonusModifier; 
+            enemy.remainingHealth -= GameControl.player.playerManager.wieldedWeapon.damage * modifier;
 
             if (enemy.remainingHealth <= 0)
             {
@@ -75,4 +80,4 @@ public class Arrow : MonoBehaviour
         //ResetCollision();
         GameControl.turnController.NextActorTurn();
     }
-}
+}}

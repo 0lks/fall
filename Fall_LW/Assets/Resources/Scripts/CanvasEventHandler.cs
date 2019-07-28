@@ -2,6 +2,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+// Internal dependencies
+using FALL.Core;
+using FALL.Characters;
+
 public class CanvasEventHandler : MonoBehaviour
 {
     public GameObject menu;
@@ -103,7 +107,8 @@ public class CanvasEventHandler : MonoBehaviour
         hpBar.SetActive(true);
         menu.SetActive(true); // Bit sloppy, we don't need to go to the main menu here, but ToggleUI below will complain otherwise
         GameControl.playMouse.enabled = false;
-        GameControl.terrain.heightmapPixelError = 20;
+        //GameControl.terrain.heightmapPixelError = 20;
+        GameControl.terrain.heightmapPixelError = 10;
         GameControl.terrain.drawTreesAndFoliage = true;
         /*
         * INITIALIZATION
@@ -175,17 +180,17 @@ public class CanvasEventHandler : MonoBehaviour
 
     public void AttackMode()
     {
-        GameControl.NewPlayerState("ATTACK");
+        GameControl.NewPlayerState(GameControl.PlayerState.Attack);
     }
 
     public void MoveMode()
     {
-        GameControl.NewPlayerState("MOVE");
+        GameControl.NewPlayerState(GameControl.PlayerState.Move);
     }
 
     public void SneakMode()
     {
-        if (GameControl.playerState == "MOVE" || GameControl.playerState == "EXPLORING")
+        if (GameControl.playerState == GameControl.PlayerState.Move || GameControl.playerState == GameControl.PlayerState.Exploring)
         {
             GameControl.player.Sneak();
             if (sneakButton.GetComponent<Image>().color == Color.white)

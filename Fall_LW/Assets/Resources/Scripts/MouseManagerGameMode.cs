@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+// Internal dependencies
+using FALL.Core;
+using FALL.Characters;
+
 public class MouseManagerGameMode : MouseManager
 {
     private void Awake()
@@ -48,7 +52,7 @@ public class MouseManagerGameMode : MouseManager
                     {
                         Hex hitHex = hitObject.GetComponent<Hex>();
                         if (!hitHex) return;
-                        if (GameControl.playerState == "MOVE")
+                        if (GameControl.playerState == GameControl.PlayerState.Move)
                         {
                             if (GameControl.selectedHex != hitHex && !hitHex.blocked && GameControl.player.highlightedNeighbours.Contains(hitHex))
                             {
@@ -61,7 +65,7 @@ public class MouseManagerGameMode : MouseManager
                             }
                         }
 
-                        else if (GameControl.playerState == "ATTACK")
+                        else if (GameControl.playerState == GameControl.PlayerState.Attack)
                         {
                             if (Input.GetMouseButtonDown(0))
                             {
@@ -72,7 +76,7 @@ public class MouseManagerGameMode : MouseManager
                     }
                     else if (hitObject.tag == "Enemy")
                     {
-                        if (GameControl.playerState == "ATTACK")
+                        if (GameControl.playerState == GameControl.PlayerState.Attack)
                         {
                             if (Input.GetMouseButtonDown(0))
                             {
@@ -99,26 +103,23 @@ public class MouseManagerGameMode : MouseManager
                 {
                     GameObject hitObject = hitInfo.transform.gameObject;
 
-                    if (hitObject.tag == "Hex" && GameControl.playerState != "ATTACK")
+                    if (hitObject.tag == "Hex" && GameControl.playerState != GameControl.PlayerState.Attack)
                     {
                         Hex hitHex = hitObject.GetComponent<Hex>();
                         if (!hitHex) return;
-
-                            if (GameControl.selectedHex != hitHex && !hitHex.blocked && GameControl.player.highlightedNeighbours.Contains(hitHex))
-                            {
-                                if (hitHex.Selected()) GameControl.selectedHex = hitHex;
-                                else GameControl.selectedHex = null;
-                            }
-                            else if (GameControl.selectedHex == hitHex)
-                            {
-                                if (hitHex.occupyingCharacter != null) return;
-                                else GameControl.player.MoveTo(hitHex);
-                            }
+                        if (GameControl.selectedHex != hitHex && !hitHex.blocked && GameControl.player.highlightedNeighbours.Contains(hitHex))
+                        {
+                            if (hitHex.Selected()) GameControl.selectedHex = hitHex;
+                            else GameControl.selectedHex = null;
                         }
-
+                        else if (GameControl.selectedHex == hitHex)
+                        {
+                            if (hitHex.occupyingCharacter != null) return;
+                            else GameControl.player.MoveTo(hitHex);
+                        }
+                    }
                 }
             }
         }
-
     }
 }

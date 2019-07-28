@@ -2,6 +2,10 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+// Internal dependencies
+using FALL.Core;
+using FALL.Characters;
+
 public class MouseManagerMapEditing : MouseManager
 {
     private float hexWidth;
@@ -224,7 +228,10 @@ public class MouseManagerMapEditing : MouseManager
         GameControl.map.AddHexToMap(newHexHex);
         newHexHex.DisableOverlappingColliders();
         newHexHex.Highlight();
+        newHexHex.RefreshImmediateNeighbours();
+        originHex.RefreshImmediateNeighbours();
         GameControl.map.vertexDisplacer.DisplaceVertices(newHexHex);
+        GameControl.map.addedHexesThisSession = true; // Signals the GC that the Graph has to be reconstructed.
     }
 
     private void OnEnable()

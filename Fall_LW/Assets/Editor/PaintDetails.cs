@@ -44,7 +44,6 @@ public class PaintDetails : EditorWindow
             foreach (Object obj in stuff)
             {
                 GameObject obj_ = (GameObject) obj;
-                obj_.GetComponent<LODGroup>().enabled = false;
             }
         }
         else
@@ -52,7 +51,6 @@ public class PaintDetails : EditorWindow
             foreach (Object obj in stuff)
             {
                 GameObject obj_ = (GameObject)obj;
-                obj_.GetComponent<LODGroup>().enabled = true;
             }
         }
         Parent = GameObject.FindGameObjectWithTag("GroundObjectsParent");

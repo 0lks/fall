@@ -195,7 +195,7 @@
     <Compile Include="Assets\Other, Unsorted\TextMesh Pro\Examples &amp; Extras\Scripts\VertexZoom.cs" />
     <Compile Include="Assets\Other, Unsorted\TextMesh Pro\Examples &amp; Extras\Scripts\WarpTextExample.cs" />
     <Compile Include="Assets\Resources\Scripts\Animation Events\DetectedPlayer.cs" />
-    <Compile Include="Assets\Resources\Scripts\Animation Events\EnteredIdle.cs" />
+    <Compile Include="Assets\Resources\Scripts\Animation Events\ShootBowEnd.cs" />
     <Compile Include="Assets\Resources\Scripts\Arrow.cs" />
     <Compile Include="Assets\Resources\Scripts\Bow.cs" />
     <Compile Include="Assets\Resources\Scripts\CanvasEventHandler.cs" />
@@ -204,6 +204,7 @@
     <Compile Include="Assets\Resources\Scripts\Characters\CharacterDATA.cs" />
     <Compile Include="Assets\Resources\Scripts\Characters\Enemy.cs" />
     <Compile Include="Assets\Resources\Scripts\Characters\Player.cs" />
+    <Compile Include="Assets\Resources\Scripts\Characters\PlayerManager.cs" />
     <Compile Include="Assets\Resources\Scripts\Characters\Weapon.cs" />
     <Compile Include="Assets\Resources\Scripts\Characters\WeaponDATA.cs" />
     <Compile Include="Assets\Resources\Scripts\FixedRotation.cs" />
@@ -296,6 +297,7 @@
     <None Include="Assets\Other, Unsorted\TextMesh Pro\Resources\Shaders\TMP_SDF.shader" />
     <None Include="Assets\Other, Unsorted\PostProcessing\Resources\Shaders\ColorGrading.cginc" />
     <None Include="Assets\Other, Unsorted\STANDARD ASSETS\Environment\Water\Water4\Shaders\FXWater4Advanced.shader" />
+    <None Include="Assets\Terrain Maps and Images\Scene_v2\Original maps\Scene_v2 README.txt" />
     <None Include="Assets\Other, Unsorted\TextMesh Pro\Resources\Shaders\TMP_SDF-Mobile.shader" />
     <None Include="Assets\Other, Unsorted\PostProcessing\Resources\Shaders\AmbientOcclusion.cginc" />
     <None Include="Assets\Other, Unsorted\TextMesh Pro\Resources\Shaders\TMP_Sprite.shader" />

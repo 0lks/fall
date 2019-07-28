@@ -3,9 +3,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
 
-public class GameControl : MonoBehaviour {
+// Internal dependencies
+using FALL.Characters;
+
+namespace FALL.Core {
+public class GameControl : MonoBehaviour
+{
     public static Map map;
     public static GameObject hexPrefab;
     public static Graph graph;
@@ -27,34 +33,36 @@ public class GameControl : MonoBehaviour {
     public static Queue<Hex> movePath;
     public static int queueInDistance;
     public int _queueInDistance;
-    public int[,] playerSpawnPoint = new int[1,3];
+    public int[,] playerSpawnPoint = new int[1, 3];
     public int playerSpawnX;
     public int playerSpawnY;
     public int playerSpawnZ;
-
+    string sceneName;
     /*
-     * Enemy Spawning
+    * Enemy Spawning
     */
     [HideInInspector] public bool POPULATE = false;
     public static int enemyCount = 0;
-    public int predefinedSpawnsCount = 0;
+    [HideInInspector] public int predefinedSpawnsCount;
     [HideInInspector] public bool distributeRandomly;
     //public int[,] predefinedSpawnPoints;
     Stack<int[]> predefinedSpawnPoints = new Stack<int[]>();
+    //Input
     public string[] predefinedSpawnPointsAsStrings;
     // // // // // // // // // // // // // // // 
-
-    private static string _playerState = "EXPLORING";
-    public static string playerState
+    public enum PlayerState { Exploring, Move, Attack }
+    //private static string _playerState = "EXPLORING";
+    private static PlayerState _playerState = PlayerState.Exploring;
+    public static PlayerState playerState
     {
         get { return _playerState; }
         private set { NewPlayerState(value); }
     }
-    public static void NewPlayerState(string state) //replace w enum
+    public static void NewPlayerState(PlayerState state)
     {
-        string prevstate = _playerState;
+        PlayerState prevstate = _playerState;
         _playerState = state;
-        if (_playerState == "MOVE")
+        if (_playerState == PlayerState.Move)
         {
             player.currentPosition.HighLightSurroundingMoveState(player.movementAmount);
             player.currentPosition.Highlight();
@@ -62,16 +70,16 @@ public class GameControl : MonoBehaviour {
             canvas.SetColor(canvas.attackButton, Color.white);
             canvas.EnableButtons();
         }
-        else if (_playerState == "ATTACK")
+        else if (_playerState == PlayerState.Attack)
         {
-            player.currentPosition.HighLightSurroundingAttackState(player.wieldedWeapon.attackDistance);
+            player.currentPosition.HighLightSurroundingAttackState(player.playerManager.wieldedWeapon.attackDistance);
             player.currentPosition.Highlight();
             canvas.SetColor(canvas.attackButton, Color.green);
             canvas.SetColor(canvas.moveButton, Color.white);
             canvas.EnableButtons();
         }
 
-        else if (_playerState == "EXPLORING")
+        else if (_playerState == PlayerState.Exploring)
         {
             playedSoundThisTurn = false;
             canvas.SetColor(canvas.turnButton, Color.white);
@@ -113,15 +121,19 @@ public class GameControl : MonoBehaviour {
     public static string activeMouseMode;
 
 
-    void Awake () {
-        hexPrefab = (GameObject) Resources.Load("Prefabs/Other/Hex/Hex");
-        wolf = (GameObject) Resources.Load("Prefabs/Characters/Wolf/Wolf");
+    void Awake()
+    {
+        hexPrefab = (GameObject)Resources.Load("Prefabs/Other/Hex/Hex");
+        wolf = (GameObject)Resources.Load("Prefabs/Characters/Wolf/Wolf");
         queueInDistance = _queueInDistance;
         //Application.targetFrameRate = 60;
+        QualitySettings.vSyncCount = 0;
         playerSpawnPoint[0, 0] = playerSpawnX;
         playerSpawnPoint[0, 1] = playerSpawnY;
         playerSpawnPoint[0, 2] = playerSpawnZ;
+        sceneName = SceneManager.GetActiveScene().name;
 
+            predefinedSpawnsCount = predefinedSpawnPointsAsStrings.Length;
         foreach (string spawnPoint_ in predefinedSpawnPointsAsStrings)
         {
             string[] spawnPoint = spawnPoint_.Split('_');
@@ -147,7 +159,6 @@ public class GameControl : MonoBehaviour {
         canvas = GameObject.FindGameObjectWithTag("Canvas").GetComponent<CanvasEventHandler>();
         editingMouse = gameObject.AddComponent<MouseManagerMapEditing>();
         playMouse = gameObject.AddComponent<MouseManagerGameMode>();
-        LoadLevel();
         allEnemies = new List<Enemy>();
         nearbyEnemies = new List<Enemy>();
         turnController = gameObject.AddComponent<TurnController>();
@@ -158,7 +169,7 @@ public class GameControl : MonoBehaviour {
         mainCamera.transform.gameObject.SetActive(false);
         //orthoCamera.transform.gameObject.SetActive(true);
         orthoCamera.transform.gameObject.SetActive(false);
-
+        LoadLevel();
         discardPool = GameObject.FindGameObjectWithTag("DiscardPool");
 
         activeMouseMode = "MapEditing";
@@ -184,6 +195,7 @@ public class GameControl : MonoBehaviour {
     */
     public static HashSet<Hex> playerSurroundingHexes = new HashSet<Hex>();
     private void RenderHexes(int dist)
+    // TODO: Move dependency on Player and Hex downstream
     {
         foreach (Hex hex in map.GetAllHexes()) hex.gameObject.SetActive(false);
         foreach (Hex hex in player.currentPosition.GetDistantNeighbours(dist, true))
@@ -192,7 +204,7 @@ public class GameControl : MonoBehaviour {
             playerSurroundingHexes.Add(hex);
         }
     }
-    
+
     public void InitilizeBaseGameState()
     // Called by StartGame(), resets the game to its original state
     {
@@ -200,7 +212,10 @@ public class GameControl : MonoBehaviour {
         canvas.ResetColors();
         player.GetComponent<Animator>().SetFloat("MovementSpeed", 20f);
         activeMouseMode = "Game";
-
+        if (map.addedHexesThisSession)
+        {
+            map.WaitAndConstructGraph();
+        }
         /*
         if (playerSpawnPoint != null && map.HexExists(playerSpawnPoint))
         {
@@ -252,7 +267,7 @@ public class GameControl : MonoBehaviour {
         player.healthBar = canvas.hpBar.GetComponentInChildren<SimpleHealthBar>();
         player.healthBar.UpdateBar(player.remainingHealth, player.stats.baseHealthAmount);
 
-        NewPlayerState("EXPLORING");
+        NewPlayerState(PlayerState.Exploring);
 
         //Debug.Log(queueInDistance + 10);
         RenderHexes(queueInDistance + 10);
@@ -261,15 +276,16 @@ public class GameControl : MonoBehaviour {
     public void SaveLevel()
     {
         Debug.Log("Saving level...");
-        File.Delete("start.dat");
-        map.Serialize();
+        string fileName = sceneName + ".dat";
+        File.Delete(fileName);
+        map.Serialize(fileName);
     }
 
     private void LoadLevel()
     {
-        if (File.Exists("start.dat"))
+        if (File.Exists(sceneName + ".dat"))
         {
-            using (Stream stream = File.Open("start.dat", FileMode.Open))
+            using (Stream stream = File.Open(sceneName + ".dat", FileMode.Open))
             {
                 var bformatter = new BinaryFormatter();
                 MapSerializedContent deserializedMap = (MapSerializedContent)bformatter.Deserialize(stream);
@@ -277,6 +293,28 @@ public class GameControl : MonoBehaviour {
 
                 stream.Close();
             }
+        }
+        else
+        // No existing hex map was found for this scene.
+        // Setting up a new one with the first hex at the
+        // center of the terrain with a coordinate of 0_0_0.
+        {
+            Vector3 terrainSize = terrain.terrainData.size;
+            Vector3 terrainCenter = new Vector3(terrainSize.x / 2, terrainSize.y / 2, 510);
+            GameObject firstHex_ = Instantiate(hexPrefab, terrainCenter, Quaternion.identity, GameControl.map.transform.Find("Hexes"));
+            Hex firstHex = firstHex_.GetComponent<Hex>();
+            firstHex.x = 0;
+            firstHex.y = 0;
+            firstHex.z = 0;
+            firstHex.setId();
+            firstHex.name = firstHex.id;
+            map.AddHexToMap(firstHex);
+            //firstHex.Highlight();
+            map.vertexDisplacer.DisplaceVertices(firstHex);
+            orthoCamera.transform.position = new Vector3(
+                firstHex.transform.position.x,
+                orthoCamera.transform.position.y,
+                firstHex.transform.position.z);
         }
     }
 
@@ -378,12 +416,12 @@ public class GameControl : MonoBehaviour {
     public static void CheckEnemies()
     // Checks if we are approaching any enemies that should be added to the turn queue
     /* Called:
-     * 1) By MouseManagerGameMode OnEnable(), which is enabled after exiting a movement command or at the beginning of the turn.
+        * 1) By MouseManagerGameMode OnEnable(), which is enabled after exiting a movement command or at the beginning of the turn.
     */
     {
         if (allEnemies == null)
         {
-            NewPlayerState("EXPLORING");
+            NewPlayerState(PlayerState.Exploring);
             Debug.Log("No enemies found.");
             return;
         }
@@ -443,13 +481,13 @@ public class GameControl : MonoBehaviour {
 
         if (nearbyEnemies.Count == 0)
         {
-            NewPlayerState("EXPLORING");
+            NewPlayerState(PlayerState.Exploring);
         }
         else
         {
             SetDetectedState(anyDetected);
-            if (player.movementAmount <= 0) NewPlayerState("ATTACK");
-            else NewPlayerState("MOVE");
+            if (player.movementAmount <= 0) NewPlayerState(PlayerState.Attack);
+            else NewPlayerState(PlayerState.Move);
         }
     }
 
@@ -500,6 +538,4 @@ public class GameControl : MonoBehaviour {
         if (activeMouseMode == "MapEditing") GetComponent<MouseManagerMapEditing>().enabled = true;
         else GetComponent<MouseManagerGameMode>().enabled = true;
     }
-}
-
-
+}}
