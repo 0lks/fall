@@ -60,15 +60,15 @@ MonoBehaviour:
   m_SamplingShader: {fileID: 4800000, guid: 04c410c9937594faa893a11dceb85f7e, type: 3}
   m_OpaqueLayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 524087
   m_TransparentLayerMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 524087
   m_DefaultStencilState:
     overrideStencilState: 0
-    stencilReference: 4
+    stencilReference: 0
     stencilCompareFunction: 8
-    passOperation: 2
+    passOperation: 0
     failOperation: 0
     zFailOperation: 0
 --- !u!114 &4297390317566447962
