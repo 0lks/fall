@@ -9,15 +9,20 @@ using FALL.Core;
 namespace FALL.Characters {
     public class Player : Character
     {
-        //EquipmentManager equipmentManager;
-        //[HideInInspector] public Weapon wieldedWeapon;
+        [SerializeField] PlayerDATA _stats;
         [HideInInspector] public SimpleHealthBar healthBar;
         [HideInInspector] public List<Hex> attackableHexes;
         [HideInInspector] public List<Hex> highlightedNeighbours;
         public PlayerManager playerManager;
 
+        /*
+         * Getters for initial values specific to Player
+        */
+        public int GetBaseExploreMovementAmount() { return _stats.baseExploreMovementAmount; }
+
         protected new void Awake()
         {
+            base.stats = _stats;
             base.Awake();
             GameControl.player = this;
             playerManager = GetComponent<PlayerManager>();
@@ -26,6 +31,19 @@ namespace FALL.Characters {
         // Stores the step lost when going from upright movement to sneak movement with an odd number of steps left
         [HideInInspector] public bool extraStep;
         [HideInInspector] public bool sneaking = false;
+
+        public override void MoveTo(Hex target)
+        {
+            if (target.blocked || target == currentPosition) return;
+            GameControl.canvas.DisableButtons();
+            GameControl.gameControl.DisableMouse();
+
+            //movementAmount -= GameControl.movePath.Count - 1;
+            movementAmount -= GameControl.movePath.Count;
+            //GameControl.movePath.Dequeue(); //TODO: The first element is the current location - fix the problem in Graph.
+            StartCoroutine(MoveCoroutine(GameControl.movePath));
+            GameControl.gameControl.DisableMouse();
+        }
 
         public void Sneak()
         {
@@ -94,8 +112,8 @@ namespace FALL.Characters {
                 {
                     if (!enemy.hasDetectedPlayer)
                     {
-                        if ((sneaking && hex.DistanceTo(enemy.currentPosition) <= enemy.stats.sneakingPlayerDetectDist)
-                            || !sneaking && hex.DistanceTo(enemy.currentPosition) <= enemy.stats.defaultPlayerDetectDist)
+                        if ((sneaking && hex.DistanceTo(enemy.currentPosition) <= enemy.GetSneakingPlayerDetectDist())
+                            || !sneaking && hex.DistanceTo(enemy.currentPosition) <= enemy.GetPlayerDetectDist())
                         {
                             hex.inEnemyRange = true;
                         }
@@ -115,6 +133,16 @@ namespace FALL.Characters {
                 sneaking = false;
                 Sneak();
             }
+        }
+
+        public override void Die()
+        {
+            currentPosition.occupyingCharacter = null;
+            GameControl.turnController.RemoveFromQueue(this);
+            GameControl.canvas.DisplayDeathScreen();
+            transform.gameObject.SetActive(false);
+            GameControl.editingMouse.enabled = false;
+            GameControl.playMouse.enabled = false;
         }
     }
 }

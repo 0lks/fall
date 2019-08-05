@@ -85,7 +85,7 @@ namespace FALL.Core {
             {
                 playedSoundThisTurn = false;
                 canvas.SetColor(canvas.turnButton, Color.white);
-                player.movementAmount = player.stats.baseExploreMovementAmount;
+                player.movementAmount = player.GetBaseExploreMovementAmount();
                 player.currentPosition.HighLightSurroundingMoveState(player.movementAmount);
                 player.currentPosition.Highlight();
                 turnController.enabled = false;
@@ -266,10 +266,10 @@ namespace FALL.Core {
                 nearbyEnemies = null;
                 allEnemies = null;
             }
-            player.remainingHealth = player.stats.baseHealthAmount;
+            player.remainingHealth = player.GetBaseHealthAmount();
             player.gameObject.SetActive(true);
             player.healthBar = canvas.hpBar.GetComponentInChildren<SimpleHealthBar>();
-            player.healthBar.UpdateBar(player.remainingHealth, player.stats.baseHealthAmount);
+            player.healthBar.UpdateBar(player.remainingHealth, player.GetBaseHealthAmount());
 
             NewPlayerState(PlayerState.Exploring);
 
@@ -417,6 +417,14 @@ namespace FALL.Core {
             }
         }
 
+        public static void SetLayerRecursively(Transform root, int layerNumber)
+        {
+            foreach (Transform trans in root.GetComponentsInChildren<Transform>(true))
+            {
+                trans.gameObject.layer = layerNumber;
+            }
+        }
+
         public static void CheckEnemies()
         // Checks if we are approaching any enemies that should be added to the turn queue
         /* Called:
@@ -439,7 +447,7 @@ namespace FALL.Core {
                 {
                     if (turnController.enabled == false)
                     {
-                        player.movementAmount = player.stats.baseMovementAmount;
+                        player.movementAmount = player.GetBaseMovementAmount();
                         canvas.SetColor(canvas.turnButton, Color.yellow);
                         turnController.enabled = true;
                         nearbyEnemies.Add(enemy);
@@ -453,7 +461,8 @@ namespace FALL.Core {
                     }
 
                     // Assign the child containing the renderer to layer 19 so that it is rendered with XRay.
-                    enemy.transform.GetChild(1).gameObject.layer = 19;
+                    //enemy.transform.GetChild(0).gameObject.layer = 19;
+                    SetLayerRecursively(enemy.transform.GetChild(0), 19);
                 }
                 else
                 {

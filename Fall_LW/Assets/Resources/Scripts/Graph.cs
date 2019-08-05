@@ -32,7 +32,7 @@ public class Graph : Map
         HashSet<Node> visitedNodes = new HashSet<Node>();
 
         startNode.tentativeDistance = 0;
-        startNode.pathToHere.Enqueue(startNode);
+        //startNode.pathToHere.Enqueue(startNode);
         startNode.CalcDistToDest(endHex);
         Queue<Node> q = new Queue<Node>();
         q.Enqueue(startNode);

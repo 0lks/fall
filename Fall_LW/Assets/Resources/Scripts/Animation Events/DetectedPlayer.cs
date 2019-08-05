@@ -41,5 +41,6 @@ public class DetectedPlayer : StateMachineBehaviour
     public override void OnStateEnter(Animator animator, AnimatorStateInfo animatorStateInfo, int layerIndex)
     {
         animator.gameObject.GetComponent<Enemy>().RotateTowards(GameControl.player.transform);
+        //animator.gameObject.GetComponentInParent<Enemy>().RotateTowards(GameControl.player.transform);
     }
 }

@@ -201,12 +201,10 @@
     <Compile Include="Assets\Resources\Scripts\CanvasEventHandler.cs" />
     <Compile Include="Assets\Resources\Scripts\CapsuleCastHelper.cs" />
     <Compile Include="Assets\Resources\Scripts\Characters\Character.cs" />
-    <Compile Include="Assets\Resources\Scripts\Characters\CharacterDATA.cs" />
     <Compile Include="Assets\Resources\Scripts\Characters\Enemy.cs" />
     <Compile Include="Assets\Resources\Scripts\Characters\Player.cs" />
     <Compile Include="Assets\Resources\Scripts\Characters\PlayerManager.cs" />
     <Compile Include="Assets\Resources\Scripts\Characters\Weapon.cs" />
-    <Compile Include="Assets\Resources\Scripts\Characters\WeaponDATA.cs" />
     <Compile Include="Assets\Resources\Scripts\FixedRotation.cs" />
     <Compile Include="Assets\Resources\Scripts\GameControl.cs" />
     <Compile Include="Assets\Resources\Scripts\Graph.cs" />
@@ -221,14 +219,16 @@
     <Compile Include="Assets\Resources\Scripts\MouseManagerMapEditing.cs" />
     <Compile Include="Assets\Resources\Scripts\OrthographicCameraMovement.cs" />
     <Compile Include="Assets\Resources\Scripts\PerspectiveCameraMovement.cs" />
+    <Compile Include="Assets\Resources\Scripts\Scriptable Objects\CharacterDATA.cs" />
+    <Compile Include="Assets\Resources\Scripts\Scriptable Objects\GearDATA.cs" />
+    <Compile Include="Assets\Resources\Scripts\Scriptable Objects\ItemDATA.cs" />
+    <Compile Include="Assets\Resources\Scripts\Scriptable Objects\WeaponDATA.cs" />
     <Compile Include="Assets\Resources\Scripts\TransformDeepChild.cs" />
     <Compile Include="Assets\Resources\Scripts\TurnController.cs" />
     <Compile Include="Assets\Resources\Scripts\Unimplemented\EquipmentManager.cs" />
     <Compile Include="Assets\Resources\Scripts\Unimplemented\Gear.cs" />
-    <Compile Include="Assets\Resources\Scripts\Unimplemented\GearDATA.cs" />
     <Compile Include="Assets\Resources\Scripts\Unimplemented\InventoryManager.cs" />
     <Compile Include="Assets\Resources\Scripts\Unimplemented\Item.cs" />
-    <Compile Include="Assets\Resources\Scripts\Unimplemented\ItemDATA.cs" />
     <None Include="Assets\Other, Unsorted\PostProcessing\Resources\Shaders\DepthOfField.shader" />
     <None Include="Assets\Terrain Maps and Images\Appalachean1\Cherokee Heart README.txt" />
     <None Include="Assets\Other, Unsorted\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
@@ -306,6 +306,9 @@
     <Reference Include="Unity.Timeline.Editor">
       <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.VSCode.Editor">
+      <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.RenderPipelines.Core.Editor">
       <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.RenderPipelines.Core.Editor.dll</HintPath>
     </Reference>
@@ -321,6 +324,9 @@
     <Reference Include="Unity.RenderPipelines.Lightweight.Editor">
       <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.RenderPipelines.Lightweight.Editor.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Timeline">
       <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
     </Reference>
@@ -330,11 +336,20 @@
     <Reference Include="Unity.Postprocessing.Editor">
       <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.Postprocessing.Editor.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.Rider.Editor">
+      <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary">
       <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.2D.Sprite.Editor">
+      <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.2D.Sprite.Editor.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Postprocessing.Runtime">
       <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.Postprocessing.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.2D.Tilemap.Editor">
+      <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.2D.Tilemap.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.ShaderGraph.Editor">
       <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.ShaderGraph.Editor.dll</HintPath>
@@ -347,21 +362,6 @@
     </Reference>
     <Reference Include="Unity.Analytics.DataPrivacy">
       <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.Analytics.DataPrivacy.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.VSCode.Editor">
-      <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.Rider.Editor">
-      <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.2D.Sprite.Editor">
-      <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.2D.Sprite.Editor.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.2D.Tilemap.Editor">
-      <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/Unity.2D.Tilemap.Editor.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.UI">
       <HintPath>C:/Users/OliverPC/Desktop/Fall/Fall_LW/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>

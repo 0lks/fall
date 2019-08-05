@@ -314,11 +314,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 68f7fdb213d9e3b47b8b4248c827a0ab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  stats: {fileID: 11400000, guid: b6960f48d0dea6345b461bbb8b83f450, type: 2}
   rb: {fileID: 0}
   animator: {fileID: 0}
   movementAmount: 0
   remainingHealth: 0
+  _stats: {fileID: 11400000, guid: 63751268f7acc0b4085f014705f8c11a, type: 2}
   healthBar: {fileID: 0}
   attackableHexes: []
   highlightedNeighbours: []
@@ -571,6 +571,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 13700000, guid: 323623cf5e34fc047987ef4f4cfedfc4, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 482c319a1e9e27146842ada22f987780, type: 2}
     - target: {fileID: 100014, guid: 323623cf5e34fc047987ef4f4cfedfc4, type: 3}
       propertyPath: m_Layer
       value: 17
