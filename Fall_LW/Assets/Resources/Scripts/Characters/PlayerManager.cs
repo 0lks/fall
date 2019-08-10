@@ -6,6 +6,7 @@ using FALL.Core;
 
 public class PlayerManager : MonoBehaviour
 {
+    /*
     public Weapon wieldedWeapon;
     [HideInInspector] public Animator playerAnimator;
 
@@ -25,4 +26,5 @@ public class PlayerManager : MonoBehaviour
     {
 
     }
+    */
 }

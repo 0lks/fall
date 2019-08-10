@@ -74,7 +74,7 @@ namespace FALL.Core {
             }
             else if (_playerState == PlayerState.Attack)
             {
-                player.currentPosition.HighLightSurroundingAttackState(player.playerManager.wieldedWeapon.attackDistance);
+                player.currentPosition.HighLightSurroundingAttackState(player.weapon.attackDistance);
                 player.currentPosition.Highlight();
                 canvas.SetColor(canvas.attackButton, Color.green);
                 canvas.SetColor(canvas.moveButton, Color.white);
@@ -536,6 +536,17 @@ namespace FALL.Core {
                         survivorHex.id = "0_0_0";
                     }
                     */
+
+                    
+                    if (GUI.Button(new Rect(220, 10, 140, 50), "Recalculate Vertices"))
+                    {
+                        HexVertexDisplacer displacer = GameControl.map.vertexDisplacer;
+                        List<Hex> allHexes = map.GetAllHexes();
+                        foreach (Hex hex in allHexes)
+                        {
+                            displacer.DisplaceVertices(hex);
+                        }
+                    }
                 }
             }
         }

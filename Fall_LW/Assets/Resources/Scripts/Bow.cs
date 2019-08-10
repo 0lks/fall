@@ -4,7 +4,6 @@ using UnityEngine;
 
 // Internal dependencies
 using FALL.Core;
-using FALL.Characters;
 
 namespace FALL.Items.Weapons {
     public class Bow : Weapon
@@ -13,9 +12,8 @@ namespace FALL.Items.Weapons {
         public float force;
 
         // For the arrow shot animation
-        Vector3 enemyDirection;
         GameObject discardPool;
-        GameObject arrow;
+        Arrow arrow;
 
         private new void Awake()
         {
@@ -34,15 +32,29 @@ namespace FALL.Items.Weapons {
             discardPool = GameControl.discardPool;
         }
 
-        public override bool AttackTarget(Character target)
+        public override void AttackBehaviour(Vector3 enemyPos, float chanceToHit)
         {
-            Hex targetLocation = target.currentPosition;
-            //Debug.DrawLine(transform.position,enemyLocation.occupyingCharacter.transform.position,Color.blue,Mathf.Infinity);
-            weaponAnimator.Play("DrawAndRelease");
-            enemyDirection = targetLocation.occupyingCharacter.rb.worldCenterOfMass
-                - transform.position;
+            Vector3 shift = CalculateMiss(chanceToHit);
+            arrow = SpawnArrow(enemyPos, shift);
+            PlayAttackAnimation();
+        }
 
-            Vector3 missDirection;
+        public override void PlayAttackAnimation()
+        {
+            weaponAnimator.Play("DrawAndRelease");
+        }
+
+        public void ShootArrow()
+        // Called by: Bow animation event keyframe
+        {
+            arrow.gameObject.SetActive(true);
+            arrow.GetComponent<Rigidbody>().AddRelativeForce(Vector3.forward * force);
+            arrow.inFlight = true;
+        }
+
+        Vector3 CalculateMiss(float chanceToHit)
+        {
+            Vector3 shift;
             float RNG = Random.Range(0f, 100f);
             List<Vector3> missDirections = new List<Vector3>();
             missDirections.Add(Vector3.up);
@@ -50,40 +62,38 @@ namespace FALL.Items.Weapons {
             missDirections.Add(Vector3.right);
             missDirections.Add(Vector3.left);
 
-            if (RNG > target.currentPosition.chanceToHit)
+            if (RNG > chanceToHit)
             {
                 //Debug.Log("Arrow is supposed to miss");
-                missDirection = missDirections[Random.Range(0, missDirections.Count)] * 5;
+                shift = missDirections[Random.Range(0, missDirections.Count)] * 5;
             }
             else
             {
                 //Debug.Log("Arrow is supposed to hit");
-                missDirection = Vector3.zero;
+                shift = Vector3.zero;
             }
 
-            Vector3 pos = transform.position;
-            Quaternion arrowRotation = Quaternion.LookRotation(enemyDirection + missDirection, Vector3.up);
-            arrow = Instantiate(arrowPrefab, pos, arrowRotation, discardPool.transform);
-            if (missDirection == Vector3.zero) arrow.GetComponent<Arrow>().IgnoreTerrainObjectsAndTerrain();
-            else arrow.GetComponent<Arrow>().IgnoreCharacters();
-            arrow.SetActive(false); //to hide the arrow before the keyframe event
-
-            return true;
+            Debug.Log(shift);
+            return shift;
         }
 
-        public override void EquipTo(Character equipTarget)
+        Arrow SpawnArrow(Vector3 enemyPos, Vector3 shift)
         {
-            Hand hand = equipTarget.transform.GetComponentInChildren<Hand>();
-            //player.wieldedWeapon = this;
-            hand.PlaceWeaponInHand(this);
-        }
-
-
-        public void ShootArrow()
-        // Called by: Bow animation event keyframe
-        {
-            arrow.SetActive(true);
-            arrow.GetComponent<Rigidbody>().AddRelativeForce(Vector3.forward * force);
+            Vector3 enemyDirection = enemyPos - transform.position;
+            Quaternion arrowRotation = Quaternion.LookRotation(enemyDirection + shift, Vector3.up);
+            GameObject _arrow = Instantiate(arrowPrefab, transform.position, arrowRotation, discardPool.transform);
+            if (shift == Vector3.zero)
+            {
+                print("IgnoreTerrainObjectsAndTerrain()");
+                _arrow.GetComponent<Arrow>().IgnoreTerrainObjectsAndTerrain();
+            }
+            else
+            {
+                print("IgnoreCharacters()");
+                _arrow.GetComponent<Arrow>().IgnoreCharacters();
+            }
+            _arrow.SetActive(false); //to hide the arrow before the keyframe event
+            return _arrow.GetComponent<Arrow>();
         }
     }
 }

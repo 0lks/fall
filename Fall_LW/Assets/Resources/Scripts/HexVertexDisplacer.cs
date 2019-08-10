@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using UnityEngine;
 
+using FALL.Core;
+
 public class HexVertexDisplacer : MonoBehaviour
 {
     Mesh mesh;
@@ -8,7 +10,8 @@ public class HexVertexDisplacer : MonoBehaviour
 
     public void DisplaceVertices(Hex hex)
     {
-        mesh = hex.GetComponentInChildren<MeshFilter>().mesh;
+        ResetMeshVertices(hex);
+        mesh = hex.mesh;
         vertices = mesh.vertices;
         RaycastHit hitInfo;
 
@@ -37,25 +40,15 @@ public class HexVertexDisplacer : MonoBehaviour
             return;
         }
 
-        CheckIfOccupied(hex);
+        hex.CapsuleTest();
     }
-
-    private void CheckIfOccupied(Hex hex)
+    
+    public void ResetMeshVertices(Hex hex)
     {
-        /*
-        SphereCollider sc = hex.GetComponent<SphereCollider>();
-        Vector3 groundPos = hex.GetComponentInChildren<MeshRenderer>().bounds.center;
-        float dist = Vector3.Distance(hex.transform.position, groundPos);
-        sc.center = new Vector3(sc.center.x, sc.center.y - dist, sc.center.z);
-        */
-        CapsuleCollider cc = hex.GetComponent<CapsuleCollider>();
-        Rigidbody rb = hex.gameObject.AddComponent<Rigidbody>();
-        rb.isKinematic = true;
-        rb.useGravity = false;
-        //cc.center = new Vector3(sc.center.x, sc.center.y + 3f, sc.center.z);
-        cc.center = mesh.bounds.center;
-
-        Destroy(cc);
-        Destroy(rb);
+        if (hex.originalMesh == null) return;
+        else
+        {
+            hex.meshFilter.sharedMesh.vertices = GameControl.hexPrefab.GetComponentInChildren<MeshFilter>().sharedMesh.vertices;
+        }
     }
 }

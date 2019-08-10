@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 // Internal dependencies
 using FALL.Core;
+using FALL.Items.Weapons;
 //using FALL.Items.Weapons;
 
 namespace FALL.Characters {
@@ -26,11 +27,18 @@ namespace FALL.Characters {
             base.Awake();
             GameControl.player = this;
             playerManager = GetComponent<PlayerManager>();
+            EquipBow();
         }
 
         // Stores the step lost when going from upright movement to sneak movement with an odd number of steps left
         [HideInInspector] public bool extraStep;
         [HideInInspector] public bool sneaking = false;
+
+        void EquipBow()
+        {
+            weapon = FindObjectOfType<Bow>();
+            Equip(weapon);
+        }
 
         public override void MoveTo(Hex target)
         {
@@ -87,15 +95,18 @@ namespace FALL.Characters {
             highlightedNeighbours.Clear();
         }
 
-        public bool Attack(Character character)
+        public bool Attack(Character target)
         {
-            if (currentPosition.DistanceTo(character.currentPosition) > playerManager.wieldedWeapon.attackDistance ||
-                !attackableHexes.Contains(character.currentPosition)) return false;
+            if (currentPosition.DistanceTo(target.currentPosition) > weapon.attackDistance ||
+                !attackableHexes.Contains(target.currentPosition)) return false;
 
             movementAmount = 0;
-            RotateTowards(character.transform);
-            playerManager.wieldedWeapon.AttackTarget(character);
-            playerManager.playerAnimator.SetBool("ShootBow", true);
+            RotateTowards(target.transform);
+            //Debug.DrawLine(transform.position, target.transform.position,Color.blue,Mathf.Infinity);
+            Vector3 enemyPos = target.rb.worldCenterOfMass;
+            float chanceToHit = target.currentPosition.chanceToHit;
+            animator.SetBool("ShootBow", true);
+            weapon.AttackBehaviour(enemyPos, chanceToHit);
             return true;
         }
 
@@ -143,6 +154,12 @@ namespace FALL.Characters {
             transform.gameObject.SetActive(false);
             GameControl.editingMouse.enabled = false;
             GameControl.playMouse.enabled = false;
+        }
+
+        protected override void PlaceWeaponInHand()
+        {
+            Hand hand = transform.GetComponentInChildren<Hand>();
+            hand.PlaceWeaponInHand(weapon);
         }
     }
 }

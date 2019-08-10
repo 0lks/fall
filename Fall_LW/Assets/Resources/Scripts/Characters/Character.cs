@@ -4,6 +4,7 @@ using UnityEngine;
 
 // Internal dependencies
 using FALL.Core;
+using FALL.Items.Weapons;
 
 namespace FALL.Characters {
     public abstract class Character : MonoBehaviour
@@ -14,6 +15,7 @@ namespace FALL.Characters {
         [HideInInspector] public Animator animator;
         [HideInInspector] public int movementAmount;
         [HideInInspector] public float remainingHealth;
+        public Weapon weapon;
 
         private Hex _currentPosition;
         public Hex currentPosition
@@ -52,6 +54,13 @@ namespace FALL.Characters {
 
         public abstract void MoveTo(Hex target);
         public abstract void Die();
+        protected abstract void PlaceWeaponInHand();
+
+        public virtual void Equip(Weapon weaponToEquip)
+        {
+            weapon = weaponToEquip;
+            PlaceWeaponInHand();
+        }
 
         protected virtual IEnumerator MoveCoroutine(Queue<Hex> path)
         {

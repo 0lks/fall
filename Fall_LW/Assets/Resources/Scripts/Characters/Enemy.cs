@@ -206,6 +206,11 @@ namespace FALL.Characters {
             Destroy(gameObject);
         }
 
+        protected override void PlaceWeaponInHand()
+        {
+            throw new System.NotImplementedException();
+        }
+
         IEnumerator WaitForMovement(Hex destination)
         {
             while (currentPosition != destination)

@@ -29,7 +29,7 @@ public class Hex : MonoBehaviour {
     Queue<Hex> path;
     List<Hex> immediateNeighbours;
     MeshRenderer meshRend;
-    MeshFilter meshFilter;
+    public MeshFilter meshFilter;
     [HideInInspector] public enum HexType {Walkable, Black, Blocked, Editing, Hover, Danger, Att25, Att50, Att75, Att100, NULL}
     [HideInInspector] public HexType type;
     [HideInInspector] public HexType previousType;
@@ -85,6 +85,23 @@ public class Hex : MonoBehaviour {
         serialData.groundPos = new float[] { groundPos.x, groundPos.y, groundPos.z};
     }
 
+    public void CapsuleTest()
+    {
+        CapsuleCollider cc = gameObject.AddComponent<CapsuleCollider>();
+        cc.isTrigger = true;
+        cc.radius = 1.5f;
+        cc.height = 6f;
+        cc.direction = 1;
+        cc.center = mesh.bounds.center;
+
+        Rigidbody rb = gameObject.AddComponent<Rigidbody>();
+        rb.isKinematic = true;
+        rb.useGravity = false;
+
+        Destroy(cc);
+        Destroy(rb);
+    }
+
     public void SetHex(HexSerializedContent data)
     {
         x = data.x;
@@ -103,24 +120,19 @@ public class Hex : MonoBehaviour {
         mesh = mf.mesh;
         originalMesh = mesh.vertices;
 
-        float[] gp = data.groundPos;
+        //float[] gp = data.groundPos;
         //GetComponent<SphereCollider>().center = new Vector3(gp[0], gp[1], gp[2]);
         transform.gameObject.AddComponent<MeshCollider>();
         GetComponent<MeshCollider>().convex = false;
         GetComponent<MeshCollider>().sharedMesh = mesh;
 
-        GetComponent<CapsuleCollider>().center = new Vector3(gp[0], gp[1], gp[2]);
-        Rigidbody rb = gameObject.AddComponent<Rigidbody>();
-        rb.isKinematic = true;
-        rb.useGravity = false;
+        //GetComponent<CapsuleCollider>().center = new Vector3(gp[0], gp[1], gp[2]);
+        CapsuleTest();
 
         for (int i = 0; i < disabledColliders.Length; i++)
         {
             sphereColliders[i].enabled = !disabledColliders[i];
         }
-
-        Destroy(GetComponent<CapsuleCollider>());
-        Destroy(GetComponent<Rigidbody>());
     }
     #endregion
     #region Colliders

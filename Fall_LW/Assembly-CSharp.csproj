@@ -223,12 +223,12 @@
     <Compile Include="Assets\Resources\Scripts\Scriptable Objects\GearDATA.cs" />
     <Compile Include="Assets\Resources\Scripts\Scriptable Objects\ItemDATA.cs" />
     <Compile Include="Assets\Resources\Scripts\Scriptable Objects\WeaponDATA.cs" />
-    <Compile Include="Assets\Resources\Scripts\TransformDeepChild.cs" />
     <Compile Include="Assets\Resources\Scripts\TurnController.cs" />
     <Compile Include="Assets\Resources\Scripts\Unimplemented\EquipmentManager.cs" />
     <Compile Include="Assets\Resources\Scripts\Unimplemented\Gear.cs" />
     <Compile Include="Assets\Resources\Scripts\Unimplemented\InventoryManager.cs" />
     <Compile Include="Assets\Resources\Scripts\Unimplemented\Item.cs" />
+    <Compile Include="Assets\Resources\Scripts\Utility\TransformDeepChild.cs" />
     <None Include="Assets\Other, Unsorted\PostProcessing\Resources\Shaders\DepthOfField.shader" />
     <None Include="Assets\Terrain Maps and Images\Appalachean1\Cherokee Heart README.txt" />
     <None Include="Assets\Other, Unsorted\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
